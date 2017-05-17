@@ -4,13 +4,13 @@ This service allows users to create workers called `subscriptions` that consume 
 
 ### API
 
-#### Create subscription for device component
+#### Create subscription for device component with 3 second interval
 
 ```
 method: POST
 url: /api/subscription/:device/:component
 body: {
-  interval: '86400'
+  interval: '3000'
 }
 ```
 
@@ -45,12 +45,6 @@ method: GET
 url: /api/subscription
 ```
 
-#### Read, Update & Delete subscriptions also accept also accepts the use custom queries.
-
-```
-method: GET
-url: /api/subscriptions?query='{"where":{"deviceID":"bleA0E6F8B62304"},"limit":"2","sort":"createdAt DESC"}'
-```
 
 #### Get all records
 
@@ -65,36 +59,12 @@ url: /api/records
 
 ```
 method: GET
-url: /api/record?query='{"where":{"deviceID":"bleA0E6F8B62304", "componentID": "temperature"},"limit":"500","sort":"lastUpdate DESC"}'
-```
-
-#### Delete all records matching query
-
-```
-method: DELETE
-url: /api/record?query='{"where":{"deviceID":"bleA0E6F8B62304", "componentID": "temperature"},"limit":"500","sort":"lastUpdate DESC"}'
-```
-
-#### Create new record
-
-```
-method: POST
-url: /api/record
-body: {
-  'deviceID': 'bleA0E6F8B62304',
-  'componentID':'Temperature',
-  'value':'23.46875',
-  'unit':'Degree celsius',
-  'format':',
-  'lastUpdate':'1477491668082'
-}
+url: /api/record?where={"deviceID":"bleA0E6F8B62304", "componentID": "temperature"}&order={"by": "time", "direction": "DESC"}&limit=3
 ```
 
 #### Update Retention
 
-Point at which old records are deleted.
-
-__Note__ It maybe possible to make this more granular eg. for add an expiration for each `Record`. But the difficulty depends on implementation details.
+Set a interval at which old records expire.
 
 ```
 method: PUT

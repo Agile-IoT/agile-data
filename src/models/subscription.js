@@ -20,7 +20,7 @@ function subscriptionExists (sub) {
 function bootstrap () {
   agile.protocolManager.discovery.start()
   .then(function () {
-    debug.log('started discovery!');
+    debug.log('Started discovery!');
     return fs.readFileAsync(DB_FILE);
   })
   .then(data => {
