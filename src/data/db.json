@@ -1,1 +1,10 @@
-{}
+{
+    "subscriptions": [
+        {
+            "interval": "1000",
+            "deviceID": "hypem",
+            "componentID": "flick",
+            "created_at": 1495031975735
+        }
+    ]
+}

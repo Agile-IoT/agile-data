@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const dbName = process.env.AGILE_DATA_DB_NAME || 'agile_db';
 const dbMeasurement = process.env.AGILE_DATA_DB_MEASUREMENT || 'sensors';
 const subscriptionRoutes = require('./routes/subscription');
+const recordRoutes = require('./routes/record');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
