@@ -1,16 +1,1 @@
-{
-    "subscriptions": [
-        {
-            "interval": "8000",
-            "deviceID": "hypem",
-            "componentID": "test",
-            "created_at": 1494941967273
-        },
-        {
-            "interval": "12000",
-            "deviceID": "nice",
-            "componentID": "quick",
-            "created_at": 1494942234904
-        }
-    ]
-}
+{}
