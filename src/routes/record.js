@@ -9,9 +9,9 @@ const influxUtil = require('influx')
 
 function buildQuery(query) {
 
-  let queryObj = squel.select().from('sensor');
+  let queryObj = squel.select().from('records');
 
-  if (query.where) {
+  if (_.isEmpty(query.where)) {
     const whereStatements = JSON.parse(query.where);
     _.reduce(Object.keys(whereStatements), (key) => {
       return queryObj.where(`${key}=?`, whereStatements[key]);
@@ -19,12 +19,12 @@ function buildQuery(query) {
   }
 
   if (query.limit) {
-    queryObj.limit(query.limit);
+    queryObj.limit(query.limit, limit.asc);
   }
 
   if (query.order) {
-    queryObj.order("time", true)
-    // queryObj.order(query.order.by, query.order.ASC);
+    const order = JSON.parse(query.order);
+    queryObj.order(order.by, 'DESC');
   }
 
   return queryObj.toString();
@@ -33,7 +33,6 @@ function buildQuery(query) {
 router.route('/')
   .get((req, res, next) => {
     const query = buildQuery(req.query)
-    console.log(query)
     influx.query(query)
     .then((data) => {
       res.send(data)

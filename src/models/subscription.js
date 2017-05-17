@@ -48,14 +48,11 @@ function updateTimer(sub) {
     .then((temperatureReading) => {
       return influx.writePoints([
         {
-          measurement: 'sensor',
+          measurement: 'records',
           tags: getIds(sub),
           fields: _.omit(temperatureReading, ['deviceID', 'componentID'])
         }
       ])
-    })
-    .then(data => {
-      console.log(data);
     })
     .catch(err => {
       console.log(err);
