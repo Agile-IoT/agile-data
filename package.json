@@ -1,40 +1,43 @@
 {
-  "name": "simple-server-node",
+  "name": "agile-data",
   "version": "1.0.0",
-  "description": "A simple Expressjs Web server on resin.io",
-  "main": "index.js",
+  "description": "A data service for agile-iot",
+  "main": "src/index.js",
   "scripts": {
+    "lint": "eslint src/**",
+    "lint-fix": "eslint --fix src/**",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "influxd & node index.js",
-    "dev": "node index"
+    "start": "node src/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/resin-io-projects/simple-server-node.git"
+    "url": "git+https://github.com/agile-iot/agile-data"
   },
-  "keywords": [
-    "resin.io",
-    "webserver",
-    "nodejs",
-    "expressjs"
-  ],
-  "author": "Shaun Mulligan <shaun@resin.io>",
+  "author": "Craig Mulligan <craig@resin.io>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/resin-io-projects/simple-server-node/issues"
+    "url": "https://github.com/agile-iot/agile-data/issues"
   },
-  "homepage": "https://github.com/resin-io-projects/simple-server-node#readme",
+  "homepage": "https://github.com/agile-iot/agile-data#readme",
   "dependencies": {
     "agile-sdk": "0.4.0",
     "bluebird": "3.5.0",
     "body-parser": "1.17.1",
     "debug-levels": "^0.2.0",
     "express": "4.15.2",
-    "express-ws": "3.0.0",
     "influx": "5.0.0-alpha.4",
     "lodash": "4.17.4",
     "lowdb": "0.16.2",
-    "observed": "1.1.2",
-    "websocket": "^1.0.23"
+    "squel": "5.10.0"
+  },
+  "devDependencies": {
+    "eslint": "3.19.0",
+    "eslint-config-semistandard": "11.0.0",
+    "eslint-config-standard": "10.2.1",
+    "eslint-plugin-import": "2.2.0",
+    "eslint-plugin-node": "4.2.2",
+    "eslint-plugin-promise": "3.5.0",
+    "eslint-plugin-react": "7.0.1",
+    "eslint-plugin-standard": "3.0.1"
   }
 }

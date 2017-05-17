@@ -1,30 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const subscriptions = require('../models/subscription');
 const _ = require('lodash');
-const DB_NAME = 'agile_db';
 const influx = require('../models/influxdb');
-const squel = require("squel");
-const influxUtil = require('influx')
+const squel = require('squel');
 
-function buildQuery(query) {
-
+function buildQuery (query) {
   let queryObj = squel.select().from('records');
 
-  if (_.isEmpty(query.where)) {
+  if (query.where) {
     const whereStatements = JSON.parse(query.where);
-    _.reduce(Object.keys(whereStatements), (key) => {
-      return queryObj.where(`${key}=?`, whereStatements[key]);
+    _.forEach(Object.keys(whereStatements), (key) => {
+      queryObj.where(`${key}=?`, whereStatements[key]);
     });
   }
 
   if (query.limit) {
-    queryObj.limit(query.limit, limit.asc);
+    queryObj.limit(query.limit);
   }
 
   if (query.order) {
     const order = JSON.parse(query.order);
-    queryObj.order(order.by, 'DESC');
+    queryObj.order(order.by, order.direction);
   }
 
   return queryObj.toString();
@@ -32,21 +28,42 @@ function buildQuery(query) {
 
 router.route('/')
   .get((req, res, next) => {
-    const query = buildQuery(req.query)
+    const query = buildQuery(req.query);
     influx.query(query)
     .then((data) => {
-      res.send(data)
+      res.send(data);
     })
-    .catch(next)
+    .catch(next);
   })
   .post((req, res, next) => {
-
-  })
-  .put((req, res, next) => {
-
+    res.send('coming soong :)');
   })
   .delete((req, res, next) => {
+    res.send('coming soong :)');
+  });
 
+router.route('/retention')
+  .get((req, res, next) => {
+    influx.showRetentionPolicies()
+    .then(policies => {
+      res.send(policies.slice()[0]);
+    })
+    .catch(next);
   })
+  .put((req, res, next) => {
+    if (!req.body.duration) {
+      throw new Error('body.duration required');
+    }
+    // we only maintain one policy and keep altering it.
+    influx.alterRetentionPolicy('default', {
+      duration: req.body.duration,
+      replication: 1,
+      isDefault: true
+    })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch(next);
+  });
 
-module.exports = router
+module.exports = router;

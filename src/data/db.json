@@ -1,10 +1,10 @@
 {
     "subscriptions": [
         {
-            "interval": "1000",
-            "deviceID": "hypem",
-            "componentID": "flick",
-            "created_at": 1495031975735
+            "interval": "9000",
+            "deviceID": "GE_LAMP",
+            "componentID": "pressure",
+            "created_at": 1495053859176
         }
     ]
 }

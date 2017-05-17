@@ -1,35 +1,105 @@
 ## Agile data service
 
-This service consumes all data events from the agile API and writes them to an influx series.
+This service allows users to create workers called `subscriptions` that consume the agile API and write data to a timeseries database, it also allows users to query, create retention policies and directly write new measurements to the db.
 
-### Configuration
+### API
 
-| Environment Variable      | Description                                                     | Defualt                  |
-|---------------------------|-----------------------------------------------------------------|--------------------------|
-| AGILE_DATA_DB_NAME        | Influx db name                                                  | agile_db                 |
-| AGILE_DATA_DB_MEASUREMENT | Influx measurement (all values are written to one               | sensors                  |
-| DEBUG                     | Select module to debug eg. agile-data                           | none                     |
-| DEBUG_LEVEL               | Debug level: 'log', 'error', 'warn', 'debug', 'info', 'verbose' | none                     |
-| AGILE_DATA_WS_ADDRESS     | Websocket address of agile-core                                 | ws://agile-core:8080/ws/ |
+#### Create subscription for device component
 
+```
+method: POST
+url: /api/subscription/:device/:component
+body: {
+  interval: '86400'
+}
+```
 
-The following tags are written with each measurement:
+#### Delete subscription for device component
 
-| Tags     | Description              |
-|----------|--------------------------|
-| deviceID | agile device id          |
-| stream   | agile device stream name |
-| unit     | agile device stream unit |
+```
+method: DELETE
+url: /api/subscription/:device/:component
+```
 
-The following values are written with each measurement:
+#### Update subscription for device component
 
-| Values     | Description                   |
-|------------|-------------------------------|
-| value      | Data reading from sensor      |
-| lastUpdate | Timestamp of the data reading |
+```
+method: PUT
+url: /api/subscription/:device/:component
+body: {
+  interval: '10000'
+}
+```
 
-## TODO
+#### Read subscription for device component
 
-- [ ] Add eslint
-- [ ] Add pm2
-- [ ] Don't hardcode ports
+```
+method: GET
+url: /api/subscription/:device/:component
+```
+
+#### Read subscriptions all subscriptions on gateway
+
+```
+method: GET
+url: /api/subscription
+```
+
+#### Read, Update & Delete subscriptions also accept also accepts the use custom queries.
+
+```
+method: GET
+url: /api/subscriptions?query='{"where":{"deviceID":"bleA0E6F8B62304"},"limit":"2","sort":"createdAt DESC"}'
+```
+
+#### Get all records
+
+If the request is made with with ws then a connect is opened an results will be streamed, if the request is standard http then JSON object will be returned.
+
+```
+method: GET
+url: /api/records
+```
+
+#### Get all records with query
+
+```
+method: GET
+url: /api/record?query='{"where":{"deviceID":"bleA0E6F8B62304", "componentID": "temperature"},"limit":"500","sort":"lastUpdate DESC"}'
+```
+
+#### Delete all records matching query
+
+```
+method: DELETE
+url: /api/record?query='{"where":{"deviceID":"bleA0E6F8B62304", "componentID": "temperature"},"limit":"500","sort":"lastUpdate DESC"}'
+```
+
+#### Create new record
+
+```
+method: POST
+url: /api/record
+body: {
+  'deviceID': 'bleA0E6F8B62304',
+  'componentID':'Temperature',
+  'value':'23.46875',
+  'unit':'Degree celsius',
+  'format':',
+  'lastUpdate':'1477491668082'
+}
+```
+
+#### Update Retention
+
+Point at which old records are deleted.
+
+__Note__ It maybe possible to make this more granular eg. for add an expiration for each `Record`. But the difficulty depends on implementation details.
+
+```
+method: PUT
+url: /api/retention
+body: {
+  expiration: '3d'
+}
+```

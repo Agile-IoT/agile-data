@@ -1,12 +1,7 @@
 'use strict';
-const debug = require('debug-levels')('agile-data');
 const express = require('express');
 const app = express();
-const expressWs = require('express-ws')(app);
 const bodyParser = require('body-parser');
-
-const dbName = process.env.AGILE_DATA_DB_NAME || 'agile_db';
-const dbMeasurement = process.env.AGILE_DATA_DB_MEASUREMENT || 'sensors';
 const subscriptionRoutes = require('./routes/subscription');
 const recordRoutes = require('./routes/record');
 
@@ -14,11 +9,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get('/ping', function (req, res) {
-  res.send('OK')
-})
+  res.send('OK');
+});
 
-app.use('/api/subscription', subscriptionRoutes)
-app.use('/api/record', recordRoutes)
+app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/record', recordRoutes);
+
+app.use(function (req, res) {
+  res.status(404).send('Not Found');
+});
 
 app.use((err, req, res) => {
   switch (err.name) {
@@ -27,8 +26,8 @@ app.use((err, req, res) => {
     default:
       return res.status(500).send(err);
   }
-})
+});
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
-})
+app.listen(1338, function () {
+  console.log('Example app listening on port 1338!');
+});
