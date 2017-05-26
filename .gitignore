@@ -10,4 +10,4 @@ node_modules/
 #OSX hidden metadata file
 .DS_Store
 
-data
+data/db.json

@@ -3,6 +3,7 @@ const router = express.Router();
 const _ = require('lodash');
 const influx = require('../models/influxdb');
 const squel = require('squel');
+const config = require('../config');
 
 function buildQuery (query) {
   let queryObj = squel.select().from('records');
@@ -46,7 +47,7 @@ router.route('/retention')
   .get((req, res, next) => {
     influx.showRetentionPolicies()
     .then(policies => {
-      res.send(policies.slice()[0]);
+      res.send(_.find(policies, { name: config.DB_RP_NAME }));
     })
     .catch(next);
   })
@@ -55,13 +56,16 @@ router.route('/retention')
       throw new Error('body.duration required');
     }
     // we only maintain one policy and keep altering it.
-    influx.alterRetentionPolicy('default', {
+    influx.alterRetentionPolicy(config.DB_RP_NAME, {
       duration: req.body.duration,
       replication: 1,
       isDefault: true
     })
-    .then((data) => {
-      res.send(data);
+    .then(data => {
+      return influx.showRetentionPolicies()
+    })
+    .then(policies => {
+      res.send(_.find(policies, { name: config.DB_RP_NAME }));
     })
     .catch(next);
   });

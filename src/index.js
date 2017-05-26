@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const subscriptionRoutes = require('./routes/subscription');
 const recordRoutes = require('./routes/record');
+const config = require('./config');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -28,6 +29,6 @@ app.use((err, req, res) => {
   }
 });
 
-app.listen(1338, function () {
-  console.log('Example app listening on port 1338!');
+app.listen(config.PORT, function () {
+  console.log(`Example app listening on port ${config.PORT}!`);
 });

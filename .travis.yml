@@ -1,0 +1,16 @@
+language: node_js
+addons:
+  apt:
+    packages:
+    - wget
+install:
+    - mkdir influxdb_install
+    - wget https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_amd64.deb
+    - dpkg -x influxdb*.deb influxdb_install
+    - npm i
+before_script:
+  - ./influxdb_install/usr/bin/influxd &
+script:
+  - npm run test
+node_js:
+  - "7"
