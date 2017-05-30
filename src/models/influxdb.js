@@ -1,7 +1,7 @@
 'use strict';
 const Influx = require('influx');
 const _ = require('lodash');
-const config = require('../config')
+const config = require('../config');
 
 const influx = new Influx.InfluxDB({
   host: 'localhost',
@@ -38,11 +38,11 @@ influx.getDatabaseNames()
         duration: config.DB_RP_DURATION,
         replication: 1,
         isDefault: true
-      })
+      });
     }
   })
   .catch((err) => {
     throw new Error('Failed to bootstrap influx: ' + err);
-  })
+  });
 
 module.exports = influx;

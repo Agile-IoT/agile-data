@@ -5,9 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint src/**",
-    "lint-fix": "eslint --fix src/**",
+    "lint:fix": "eslint --fix src/**",
     "test": "bash test/test.sh",
-    "start": "node src/index.js"
+    "start": "npm run lint && node src/index.js"
   },
   "repository": {
     "type": "git",
