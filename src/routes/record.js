@@ -62,7 +62,7 @@ router.route('/retention')
       isDefault: true
     })
     .then(data => {
-      return influx.showRetentionPolicies()
+      return influx.showRetentionPolicies();
     })
     .then(policies => {
       res.send(_.find(policies, { name: config.DB_RP_NAME }));
