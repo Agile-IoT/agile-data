@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint src/**",
     "lint-fix": "eslint --fix src/**",
-    "test": "DEBUG=true bash test/test.sh",
+    "test": "bash test/test.sh",
     "start": "node src/index.js"
   },
   "repository": {
