@@ -8,8 +8,10 @@ This service allows users to create workers called `subscriptions` that consume 
 
 ```
 method: POST
-url: /api/subscription/:device/:component
+url: /api/subscription
 body: {
+  deviceID: 'mySensor',
+  componentID: 'temperature',
   interval: '3000'
 }
 ```

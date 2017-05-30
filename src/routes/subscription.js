@@ -8,6 +8,13 @@ router.route('/')
     subscriptions.get()
     .then((data) => res.send(data))
     .catch(next);
+  })
+  .post((req, res, next) => {
+    subscriptions.create(req.body)
+    .then((data) => res.send(data))
+    .catch((err) => {
+      next(err);
+    });
   });
 
 router.route('/:deviceID/:componentID')
@@ -15,17 +22,6 @@ router.route('/:deviceID/:componentID')
     subscriptions.get(req.params)
     .then((data) => res.send(data))
     .catch(next);
-  })
-  .post((req, res, next) => {
-    const newSub = _.assign({
-      interval: req.body.interval
-    }, req.params);
-
-    subscriptions.create(newSub)
-    .then((data) => res.send(data))
-    .catch((err) => {
-      next(err);
-    });
   })
   .put((req, res, next) => {
     const newSub = _.assign({

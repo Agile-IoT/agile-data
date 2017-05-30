@@ -1,13 +1,13 @@
 'use strict';
 const _ = require('lodash');
 const db = require('lowdb')();
-const DB_FILE = process.env.DB_FILE || `${__dirname}/../data/db.json`;
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const agile = require('agile-sdk')('http://localhost:8080');
 const subscriptions = db.get('subscriptions');
 const influx = require('./influxdb');
 const debug = require('debug-levels')('agile-data');
+const config = require('../config');
 
 function getIds (sub) {
   return _.pick(sub, ['deviceID', 'componentID']);
@@ -21,7 +21,7 @@ function bootstrap () {
   agile.protocolManager.discovery.start()
   .then(function () {
     debug.log('Started discovery!');
-    return fs.readFileAsync(DB_FILE);
+    return fs.readFileAsync(config.DB_FILE);
   })
   .then(data => {
     return db.set('subscriptions', JSON.parse(data).subscriptions || []).write();
@@ -30,6 +30,7 @@ function bootstrap () {
     return subscriptions.forEach(updateTimer).write();
   })
   .catch(err => {
+    console.log(err)
     debug.log(err);
     throw Error('Bootstraping subscriptions failed');
   });
@@ -154,7 +155,7 @@ module.exports = {
 
 function exitHandler (options, err) {
   subscriptions.forEach(removeTimer).write();
-  fs.writeFileSync(DB_FILE, JSON.stringify(db.getState(), null, 4));
+  fs.writeFileSync(config.DB_FILE, JSON.stringify(db.getState(), null, 4));
   if (err) console.log(err.stack);
   if (options.exit) process.exit();
 }
