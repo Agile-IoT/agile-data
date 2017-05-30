@@ -30,7 +30,7 @@ function bootstrap () {
     return subscriptions.forEach(updateTimer).write();
   })
   .catch(err => {
-    console.log(err)
+    console.log(err);
     debug.log(err);
     throw Error('Bootstraping subscriptions failed');
   });

@@ -1,5 +1,7 @@
 ## Agile data service
 
+[![Build Status](https://travis-ci.org/Agile-IoT/agile-data.svg?branch=master)](https://travis-ci.org/Agile-IoT/agile-data)
+
 This service allows users to create workers called `subscriptions` that consume the agile API and write data to a timeseries database, it also allows users to query, create retention policies and directly write new measurements to the db.
 
 ### API
