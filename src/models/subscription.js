@@ -18,7 +18,11 @@ function subscriptionExists (sub) {
 }
 
 function bootstrap () {
-  agile.protocolManager.discovery.start()
+  agile.protocolManager.discovery.start();
+  fs.statAsync(config.DB_FILE)
+  .catch(() => {
+    return fs.writeFileAsync(config.DB_FILE, JSON.stringify({ subscriptions: [] }, null, 4));
+  })
   .then(function () {
     debug.log('Started discovery!');
     return fs.readFileAsync(config.DB_FILE);

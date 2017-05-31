@@ -1,6 +1,6 @@
-set -e
 trap 'kill $(jobs -p)' EXIT 1
 
+while ! echo exit | nc localhost 8086; do sleep 1; done
 node test/mock.js &
 while ! echo exit | nc localhost 8080; do sleep 1; done
 node src/index.js &

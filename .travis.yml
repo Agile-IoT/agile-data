@@ -1,16 +1,33 @@
 language: node_js
-addons:
-  apt:
-    packages:
-    - wget
-install:
-    - mkdir influxdb_install
-    - wget https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_amd64.deb
-    - dpkg -x influxdb*.deb influxdb_install
-    - npm i
+
+sudo: required
+
+services:
+  - docker
+
+cache:
+  directories:
+    - $HOME/docker-cache/
+
+notifications:
+  email: false
+
+env:
+  global:
+    - COMPONENT=agile-data
+    - DOCKER_CACHE_FILE=/home/travis/docker-cache/cache.tar.gz
+  matrix:
+    - DOCKER_IMAGE=agileiot/$COMPONENT-armv7l
+    - DOCKER_IMAGE=agileiot/$COMPONENT-x86_64
+      BASEIMAGE=resin\\/intel-nuc-node:7.8.0-20170506
+      ARCH=amd64
+
+before_install:
+  - if [ "$BASEIMAGE" ] ; then sed -i "s/^FROM .*/FROM $BASEIMAGE/" Dockerfile ; fi
+  - if [ "$ARCH" ] ; then sed -i "s/armhf/$ARCH/g" Dockerfile ; fi
 before_script:
-  - ./influxdb_install/usr/bin/influxd &
+  - docker run --rm --privileged multiarch/qemu-user-static:register
 script:
-  - npm run test
+  - docker build -t agile-data-test -f Dockerfile . && docker run --env NODE_ENV=TEST agile-data-test
 node_js:
   - "7"
