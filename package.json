@@ -6,8 +6,9 @@
   "scripts": {
     "lint": "eslint src/**",
     "lint:fix": "eslint --fix src/**",
-    "test": "bash test/test.sh",
-    "start": "npm run lint && node src/index.js"
+    "test": "npm run lint && bash test/test.sh",
+    "start": "node src/index.js",
+    "dev": "node test/mock.js & npm run start"
   },
   "repository": {
     "type": "git",

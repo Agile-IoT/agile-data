@@ -19,5 +19,5 @@ app.post('/api/protocols/discovery', function (req, res) {
 })
 
 app.listen(8080, function () {
-  console.log('Example app listening on port 8080!')
+  console.log('agile API mock server listening on port 8080!')
 })
