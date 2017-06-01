@@ -28,6 +28,7 @@ env:
       ARCH=amd64
 
 before_install:
+  - if [ "$ARCH" ] ; then sed -i "s/armhf/$ARCH/g" Dockerfile ; fi
   - source <(curl -s https://raw.githubusercontent.com/Agile-IoT/agile-ci-scripts/master/before_install.sh)
   - echo "Tagging the build with tag - $DOCKER_TAG"
 
