@@ -42,6 +42,14 @@ method: GET
 url: /api/subscription/:device/:component
 ```
 
+
+#### Read subscription for device
+
+```
+method: GET
+url: /api/subscription/:device
+```
+
 #### Read subscriptions all subscriptions on gateway
 
 ```
@@ -74,6 +82,6 @@ Set a interval at which old records expire.
 method: PUT
 url: /api/retention
 body: {
-  expiration: '3d'
+  duration: '3d'
 }
 ```

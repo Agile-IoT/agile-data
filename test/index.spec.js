@@ -2,6 +2,8 @@ const Axios = require('axios');
 const chai = require('chai');
 const expect = chai.expect;
 const chaiAsPromised = require('chai-as-promised');
+const agile = require('agile-sdk')('http://localhost:1338');
+
 chai.use(chaiAsPromised);
 
 var axios = Axios.create({
@@ -20,38 +22,70 @@ DUMMY_SUBSCRIPTION_UPDATE = {
 
 describe('Subscription', function() {
   it('create', function(done) {
-    axios.post('/subscription', DUMMY_SUBSCRIPTION)
-    .then((res) => {
-      expect(res.status).to.equal(200);
-      expect(res.data.deviceID).to.equal(DUMMY_SUBSCRIPTION.deviceID);
+    agile.data.subscription.create(
+      DUMMY_SUBSCRIPTION.deviceID,
+      DUMMY_SUBSCRIPTION.componentID,
+      DUMMY_SUBSCRIPTION.interval
+    )
+    .then((sub) => {
+      expect(sub.deviceID).to.equal(DUMMY_SUBSCRIPTION.deviceID);
+      done();
+    })
+    .catch(err => console.error(err));
+  });
+
+  it('get', function(done) {
+    agile.data.subscription.get()
+    .then((data) => {
+      expect(data).to.be.an('array');
+      expect(data[0].deviceID).to.equal(DUMMY_SUBSCRIPTION.deviceID);
       done();
     });
   });
 
-  it('get', function(done) {
-    axios.get('/subscription')
-    .then((res) => {
-      expect(res.status).to.equal(200);
-      expect(res.data).to.be.an('array');
-      expect(res.data[0].deviceID).to.equal(DUMMY_SUBSCRIPTION.deviceID);
+  it('get subscription by device ID', function(done) {
+    agile.data.subscription.get(
+      DUMMY_SUBSCRIPTION.deviceID
+    )
+    .then((data) => {
+      expect(data).to.be.an('array');
+      expect(data[0].deviceID).to.equal(DUMMY_SUBSCRIPTION.deviceID);
+      done();
+    });
+  });
+
+  it('get subscription by device/component ID', function(done) {
+    agile.data.subscription.get(
+      DUMMY_SUBSCRIPTION.deviceID,
+      DUMMY_SUBSCRIPTION.componentID
+    )
+    .then((data) => {
+      expect(data).to.be.an('object');
+      expect(data.deviceID).to.equal(DUMMY_SUBSCRIPTION.deviceID);
+      expect(data.componentID).to.equal(DUMMY_SUBSCRIPTION.componentID);
       done();
     });
   });
 
   it('update', function(done) {
-    axios.put(`/subscription/${DUMMY_SUBSCRIPTION.deviceID}/${DUMMY_SUBSCRIPTION.componentID}`, DUMMY_SUBSCRIPTION_UPDATE)
-    .then((res) => {
-      expect(res.status).to.equal(200);
-      expect(res.data.interval).to.equal(DUMMY_SUBSCRIPTION_UPDATE.interval);
+    agile.data.subscription.update(
+      DUMMY_SUBSCRIPTION.deviceID,
+      DUMMY_SUBSCRIPTION.componentID,
+      DUMMY_SUBSCRIPTION_UPDATE.interval
+    )
+    .then((data) => {
+      expect(data.interval).to.equal(DUMMY_SUBSCRIPTION_UPDATE.interval);
       done();
     });
   });
 
   it('delete', function(done) {
-    axios.delete(`/subscription/${DUMMY_SUBSCRIPTION.deviceID}/${DUMMY_SUBSCRIPTION.componentID}`)
-    .then((res) => {
-      expect(res.status).to.equal(200);
-      expect(res.data).to.equal('');
+    agile.data.subscription.delete(
+      DUMMY_SUBSCRIPTION.deviceID,
+      DUMMY_SUBSCRIPTION.componentID
+    )
+    .then((data) => {
+      expect(data).to.equal('');
       done();
     });
   });
@@ -60,40 +94,34 @@ describe('Subscription', function() {
 describe('record', function() {
 
   it('get', function(done) {
-    axios.get('/record')
-    .then((res) => {
-      expect(res.status).to.equal(200);
-      expect(res.data).to.be.an('array');
+    agile.data.record.get()
+    .then((data) => {
+      expect(data).to.be.an('array');
       done();
     });
   });
 
   it('get with query', function(done) {
-    axios.get(`/record?where={"deviceID":"${DUMMY_SUBSCRIPTION.deviceID}"}&order={ "by": "time", "direction": "ASC"}`)
-    .then((res) => {
-      expect(res.status).to.equal(200);
-      expect(res.data).to.be.an('array');
+    agile.data.record.get(`where={"deviceID":"${DUMMY_SUBSCRIPTION.deviceID}"}&order={ "by": "time", "direction": "ASC"}`)
+    .then((data) => {
+      expect(data).to.be.an('array');
       done();
     });
   });
 
   describe('retention', function() {
     it('get', function(done) {
-      axios.get('/record/retention')
-      .then((res) => {
-        expect(res.status).to.equal(200);
-        expect(res.data).to.be.an('object');
+      agile.data.retention.get()
+      .then((data) => {
+        expect(data).to.be.an('object');
         done();
       });
     });
 
     it('update', function(done) {
-      axios.put('/record/retention', {
-        duration: '1d'
-      })
-      .then((res) => {
-        expect(res.status).to.equal(200);
-        expect(res.data.duration).to.equal('24h0m0s');
+      agile.data.retention.update('1d')
+      .then((data) => {
+        expect(data.duration).to.equal('24h0m0s');
         done();
       });
     });
