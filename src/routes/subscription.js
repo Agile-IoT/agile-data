@@ -5,16 +5,21 @@ const _ = require('lodash');
 
 router.route('/')
   .get((req, res, next) => {
-    subscriptions.get()
+    subscriptions.get(req.params)
     .then((data) => res.send(data))
     .catch(next);
   })
   .post((req, res, next) => {
     subscriptions.create(req.body)
     .then((data) => res.send(data))
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
+  });
+
+router.route('/:deviceID')
+  .get((req, res, next) => {
+    subscriptions.get(req.params)
+    .then((data) => res.send(data))
+    .catch(next);
   });
 
 router.route('/:deviceID/:componentID')

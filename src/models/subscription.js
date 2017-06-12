@@ -82,12 +82,20 @@ bootstrap();
 
 module.exports = {
   get: (filter) => {
-    if (filter) {
+    if (filter.componentID) {
       return Promise.resolve(
         subscriptions
           .find(filter)
           .cloneDeep()
           .tap(clean)
+          .value()
+      );
+    } else if (filter) {
+      return Promise.resolve(
+        subscriptions
+          .filter(filter)
+          .cloneDeep()
+          .map(clean)
           .value()
       );
     } else {
@@ -121,6 +129,10 @@ module.exports = {
   update: (sub) => {
     if (!subscriptionExists(sub)) {
       return Promise.reject(new Error('subscription does not exist'));
+    }
+
+    if (!sub.interval) {
+      return Promise.reject(new Error('subscription must have .interval'));
     }
 
     const record = subscriptions.find(getIds(sub));
