@@ -1,4 +1,4 @@
-FROM resin/intel-nuc-node:7.8.0-20170506
+FROM resin/raspberry-pi3-node:7.8.0-20170426
 
 ARG NODE_ENV=prod
 ENV DB_FILE=/data/db.json
