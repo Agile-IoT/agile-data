@@ -1,4 +1,4 @@
-FROM resin/raspberry-pi3-node:7.8.0-20170426
+FROM resin/intel-nuc-node:7.8.0-20170506
 
 ARG NODE_ENV=prod
 ENV DB_FILE=/data/db.json
@@ -6,7 +6,7 @@ ENV DB_FILE=/data/db.json
 RUN apt-get update && apt-get install -y netcat
 
 # Install influxdb
-RUN wget -O /tmp/influxdb.deb https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_armhf.deb && \
+RUN wget -O /tmp/influxdb.deb https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_amd64.deb && \
     dpkg -i /tmp/influxdb.deb && rm /tmp/influxdb.deb
 
 # Change influxdb data to be stored in the persising partition
