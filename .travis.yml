@@ -28,15 +28,19 @@ env:
       ARCH=amd64
 
 before_install:
-  - if [ "$ARCH" ] ; then sed -i "s/armhf/$ARCH/g" Dockerfile ; fi
-  - source <(curl -s https://raw.githubusercontent.com/Agile-IoT/agile-ci-scripts/master/before_install.sh)
+  - source <(curl -s https://raw.githubusercontent.com/Agile-IoT/agile-ci-scripts/master/agile-ci-functions.sh)
+  - cache_load
+  - bootstrap
   - echo "Tagging the build with tag - $DOCKER_TAG"
 
 script:
+  - travis_wait 40 docker_build_if_needed
   - if [[ -n ${DOCKER_TAG} ]]; then
       docker build -t $DOCKER_IMAGE:$DOCKER_TAG .;
       docker run --env NODE_ENV=TEST $DOCKER_IMAGE:$DOCKER_TAG;
     fi
+  - cache_save
 
 after_success:
-  - source <(curl -s https://raw.githubusercontent.com/Agile-IoT/agile-ci-scripts/master/after_success.sh)
+  - docker_push_if_needed
+  - versionist_if_needed

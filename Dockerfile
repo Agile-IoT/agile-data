@@ -1,16 +1,9 @@
 FROM resin/intel-nuc-node:7.8.0-20170506
 
 ARG NODE_ENV=prod
-ENV DB_FILE=/data/db.json
 
-RUN apt-get update && apt-get install -y netcat
-
-# Install influxdb
-RUN wget -O /tmp/influxdb.deb https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_amd64.deb && \
-    dpkg -i /tmp/influxdb.deb && rm /tmp/influxdb.deb
-
-# Change influxdb data to be stored in the persising partition
-# RUN sed -i 's|/var/lib/influxdb|/data/influxdb|g' /etc/influxdb/influxdb.conf
+RUN apt-get update && apt-get install -y netcat mongodb \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
 
