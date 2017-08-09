@@ -1,14 +1,16 @@
-const Axios = require('axios');
 const chai = require('chai');
 const expect = chai.expect;
 const chaiAsPromised = require('chai-as-promised');
-const agile = require('agile-sdk')('http://localhost:1338');
+const config = require('../src/config');
+const _ = require('lodash');
+
+const agile = require('agile-sdk')({
+  api: config.AGILE_API,
+  idm: config.AGILE_IDM,
+  data: config.AGILE_DATA
+});
 
 chai.use(chaiAsPromised);
-
-var axios = Axios.create({
-  baseURL: 'http://localhost:1338/api'
-});
 
 DUMMY_SUBSCRIPTION = {
   deviceID: 'myDevice',

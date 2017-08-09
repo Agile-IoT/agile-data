@@ -5,9 +5,18 @@ const bodyParser = require('body-parser');
 const subscriptionRoutes = require('./routes/subscription');
 const recordRoutes = require('./routes/record');
 const config = require('./config');
+const bootstrap = require('./bootstrap');
+
+bootstrap();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(function (req, res, next) {
+  if (req.headers.authorization) {
+    req.token = req.headers.authorization.split(' ')[1];
+  }
+  next();
+});
 
 app.get('/ping', function (req, res) {
   res.send('OK');

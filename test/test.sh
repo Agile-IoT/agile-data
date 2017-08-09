@@ -1,8 +1,9 @@
 trap 'kill $(jobs -p)' EXIT 1
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-while ! echo exit | nc localhost 8086; do sleep 1; done
+rm $parent_path/../src/data/db.json &
 node test/mock.js &
-while ! echo exit | nc localhost 8080; do sleep 1; done
+while ! echo exit | nc localhost 9999; do sleep 1; done
 node src/index.js &
 while ! echo exit | nc localhost 1338; do sleep 1; done
 echo "agile-api mock server and agile-data server started" &&
