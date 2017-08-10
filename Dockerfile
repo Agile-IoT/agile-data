@@ -9,9 +9,6 @@ RUN apt-get update && apt-get install -y netcat
 RUN wget -O /tmp/influxdb.deb https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_amd64.deb && \
     dpkg -i /tmp/influxdb.deb && rm /tmp/influxdb.deb
 
-# Change influxdb data to be stored in the persising partition
-# RUN sed -i 's|/var/lib/influxdb|/data/influxdb|g' /etc/influxdb/influxdb.conf
-
 WORKDIR /usr/src/app
 
 COPY package.json package.json

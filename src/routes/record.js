@@ -37,10 +37,10 @@ router.route('/')
     .catch(next);
   })
   .post((req, res, next) => {
-    res.send('coming soong :)');
+    res.send('coming soon :)');
   })
   .delete((req, res, next) => {
-    res.send('coming soong :)');
+    res.send('coming soon :)');
   });
 
 router.route('/retention')
