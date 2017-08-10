@@ -1,15 +1,12 @@
 'use strict';
 const _ = require('lodash');
-const fileSync = require('lowdb/lib/storages/file-sync');
+const uuid = require('uuid/v4');
 const Promise = require('bluebird');
-const timers = require('./timer');
 const config = require('../config');
-const db = require('lowdb')(config.DB_FILE, {
-  storage: {
-    write: fileSync.write
-  }
-});
+const timers = require('./timer');
+const db = require('./db');
 const subscriptions = db.get('subscriptions');
+const clients = db.get('clients');
 
 function getIds (sub) {
   return _.pick(sub, ['deviceID', 'componentID']);
@@ -43,19 +40,43 @@ module.exports = {
       return Promise.reject(new Error('subscription already exists'));
     }
 
-    // const agile = require('agile-sdk')({
-    //   api: 'http://localhost:9999',
-    //   idm: 'http://localhost:3000',
-    //   token: token,
-    // });
-
-    // return agile.idm.user.getCurrentUserInfo().then((userInfo) => {
-    //   const newSub = Object.assign(sub, {
-    //     user: userInfo
-    //   });
-    //   return newSub;
-    // })
     return Promise.resolve(sub)
+    .then((sub) => {
+      // Don't enforce authentication
+      if (token) {
+        const agile = require('agile-sdk')({
+          api: 'http://localhost:9999',
+          idm: 'http://localhost:3000',
+          token: token,
+        });
+
+        return agile.idm.user.getCurrentUserInfo()
+        .then((userInfo) => {
+          const authedSub = Object.assign(sub, {
+            user: userInfo
+          });
+          return authedSub;
+        })
+        .then((authedSub) => {
+          return agile.idm.entity.create(`agile-data-${uuid()}`, 'client', {
+            name : `${authedSub.deviceID}-${authedSub.componentID}`,
+            clientSecret: uuid(),
+            redirectURI: `${config.AGILE_IDM}/auth/${authedSub.deviceID}-${authedSub.componentID}/callback` }
+          ).then((client) => {
+            console.log('entity created!' + JSON.stringify(client, null, 2));
+            const newSub = Object.assign(sub, {
+              client: client.id
+            });
+
+            clients.push(client).write();
+            return authedSub;
+          })
+        })
+      } else {
+        // unauthenticated subscription
+        return sub;
+      }
+    })
     .then((newSub) => {
       return subscriptions
         .push(_.assign(newSub, { created_at: Date.now() }))

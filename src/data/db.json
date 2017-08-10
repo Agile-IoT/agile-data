@@ -1,3 +1,36 @@
 {
-  "subscriptions": []
+  "clients": [
+    {
+      "interval": "12000",
+      "deviceID": "mySensor",
+      "componentID": "temp",
+      "user": {
+        "id": "agile!@!agile-local",
+        "user_name": "agile",
+        "auth_type": "agile-local",
+        "scope": [
+          "1"
+        ]
+      },
+      "client": "agile-data-5444d427-953c-4fb5-b0ed-df98f259b6b6",
+      "created_at": 1502380366941
+    }
+  ],
+  "subscriptions": [
+    {
+      "interval": "12000",
+      "deviceID": "mySensor",
+      "componentID": "temp",
+      "user": {
+        "id": "agile!@!agile-local",
+        "user_name": "agile",
+        "auth_type": "agile-local",
+        "scope": [
+          "1"
+        ]
+      },
+      "client": "agile-data-5444d427-953c-4fb5-b0ed-df98f259b6b6",
+      "created_at": 1502380366941
+    }
+  ]
 }

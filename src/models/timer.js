@@ -2,6 +2,7 @@ const _ = require('lodash');
 const influx = require('./influxdb');
 const config = require('../config');
 const debug = require('debug-levels')('agile-data');
+const db = require('./db');
 const TIMERS = {};
 
 function generateTimerId (sub) {
@@ -14,21 +15,47 @@ function getTimer (sub) {
 
 module.exports = {
   update: function updateTimer (sub) {
+    console.log(sub)
     TIMERS[generateTimerId(sub)] = setInterval(() => {
+
+      const client = db.get('clients').find({ id: sub.client });
       const agile = require('agile-sdk')({
         api: config.AGILE_API,
-        idm: config.AGILE_IDM
+        idm: config.AGILE_IDM,
+        token: '0Q0h2IDk4AtZ61dU5RRdSi9yUINErN5rMIxLFJ3MlrBT830ARYfKOaiBlIRJG7CY'
       });
 
-      agile.device.lastUpdate(sub.deviceID, sub.componentID)
-      .then((data) => {
+      return Promise.resolve(client)
+      .then(client => {
+        if (client) {
+          return;
+          return agile.idm.authentication.authenticateClient(client.name, client.clientSecret).then(function (result) {
+            console.log('yassss')
+            return result.access_token;
+          })
+        } else {
+          return;
+        }
+      })
+      .then(token => {
+        // TODO allow the sdk to load a token after the fact.
+        return require('agile-sdk')({
+          api: config.AGILE_API,
+          idm: config.AGILE_IDM,
+          token: token
+        });
+      })
+      .then(sdk => {
+        return sdk.device.lastUpdate(sub.deviceID, sub.componentID)
+      })
+      .then(data => {
         debug.log('Data from agile-api', data);
-        const tags = [ 'deviceID', 'componentID', 'user' ];
+        const tags = [ 'deviceID', 'componentID' ];
         return influx.writePoints([
           {
             measurement: 'records',
-            tags: _.pick(sub, tags),
-            fields: _.omit(data, tags)
+            tags: _.assign(_.pick(sub, tags), { userID: sub.user && sub.user.id }),
+            fields: _.omit(data, tags.concat('user'))
           }
         ]);
       })

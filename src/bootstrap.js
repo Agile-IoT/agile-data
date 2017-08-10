@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const _ = require('lodash');
 const influx = require('./models/influxdb');
-const db = require('./models/subscription').db;
+const db = require('./models/db');
 const timers = require('./models/timer');
 const config = require('./config');
 const debug = require('debug-levels')('agile-data');
@@ -38,7 +38,10 @@ module.exports = () => {
     return fs.readFileAsync(config.DB_FILE);
   })
   .then(data => {
-    return db.set('subscriptions', JSON.parse(data).subscriptions || []).write();
+    // setup db stores
+    db.set('clients', JSON.parse(data).subscriptions || []).write();
+    db.set('subscriptions', JSON.parse(data).subscriptions || []).write();
+    return;
   })
   .then(() => {
     return db.get('subscriptions').forEach(timers.update).write();
