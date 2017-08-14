@@ -2,35 +2,26 @@ const _ = require('lodash');
 const influx = require('./influxdb');
 const config = require('../config');
 const debug = require('debug-levels')('agile-data');
-const db = require('./db');
 const TIMERS = {};
-
-function generateTimerId (sub) {
-  return `${sub.deviceID}-${sub.componentID}-${sub.user && sub.user.id}`;
-}
-
-function getTimer (sub) {
-  return TIMERS[generateTimerId(sub)];
-}
 
 module.exports = {
   update: function updateTimer (sub) {
     console.log(sub)
-    TIMERS[generateTimerId(sub)] = setInterval(() => {
-
-      const client = db.get('clients').find({ id: sub.client });
+    console.log('hii')
+    return TIMERS[sub.id] = setInterval(() => {
+      console.log('running timer jobs', sub.id);
       const agile = require('agile-sdk')({
         api: config.AGILE_API,
-        idm: config.AGILE_IDM,
-        token: '0Q0h2IDk4AtZ61dU5RRdSi9yUINErN5rMIxLFJ3MlrBT830ARYfKOaiBlIRJG7CY'
+        idm: config.AGILE_IDM
       });
+
+      const client = null;
 
       return Promise.resolve(client)
       .then(client => {
         if (client) {
           return;
           return agile.idm.authentication.authenticateClient(client.name, client.clientSecret).then(function (result) {
-            console.log('yassss')
             return result.access_token;
           })
         } else {
@@ -54,7 +45,7 @@ module.exports = {
         return influx.writePoints([
           {
             measurement: 'records',
-            tags: _.assign(_.pick(sub, tags), { userID: sub.user && sub.user.id }),
+            tags: _.assign(_.pick(sub, tags), { userID: sub.userID }),
             fields: _.omit(data, tags.concat('user'))
           }
         ]);
@@ -66,12 +57,8 @@ module.exports = {
         console.log(err);
       });
     }, sub.interval || config.INTERVAL_DEFAULT);
-
-    return sub;
   },
-  get: getTimer,
   clear: function clearTimer (sub) {
-    clearInterval(getTimer(sub));
-    return sub;
+    return clearInterval(timers[sub.id])
   }
 };

@@ -3,7 +3,6 @@ const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const _ = require('lodash');
 const influx = require('./models/influxdb');
-const db = require('./models/db');
 const timers = require('./models/timer');
 const config = require('./config');
 const debug = require('debug-levels')('agile-data');

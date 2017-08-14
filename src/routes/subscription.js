@@ -1,45 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const subscriptions = require('../models/subscription');
 const _ = require('lodash');
+const Subscription = require('../models/subscription');
 
 router.route('/')
   .get((req, res, next) => {
-    subscriptions.get(req.params, req.token)
-    .then((data) => res.send(data))
+    Subscription.find({})
+    .then(subscriptions => res.send(subscriptions))
     .catch(next);
   })
   .post((req, res, next) => {
-    subscriptions.create(req.body, req.token)
-    .then((data) => res.send(data))
+    Subscription.create(req.body)
+    .then(newSub => res.send(newSub))
     .catch(next);
   });
 
-router.route('/:deviceID')
+router.route('/:subscriptionId')
   .get((req, res, next) => {
-    subscriptions.get(req.params)
-    .then((data) => res.send(data))
-    .catch(next);
-  });
-
-router.route('/:deviceID/:componentID')
-  .get((req, res, next) => {
-    subscriptions.get(req.params, req.token)
-    .then((data) => res.send(data))
+    Subscription.findById(req.params.subscriptionId)
+    .then((sub) => res.send(sub))
     .catch(next);
   })
   .put((req, res, next) => {
-    const newSub = _.assign({
-      interval: req.body.interval
-    }, req.params);
-
-    subscriptions.update(newSub, req.token)
-    .then((data) => res.send(data))
+    Subscription.findById(req.params.subscriptionId)
+    .then(sub => {
+      _.assign(sub, req.body);
+      return sub.save();
+    })
+    .then(sub => res.send(sub))
     .catch(next);
   })
   .delete((req, res, next) => {
-    subscriptions.delete(req.params, req.token)
-    .then(() => res.send())
+    Subscription.findByIdAndRemove(req.params.subscriptionId)
+    .then(() => res.send(200))
     .catch(next);
   });
 
