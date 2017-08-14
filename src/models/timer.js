@@ -1,15 +1,14 @@
 const _ = require('lodash');
-const influx = require('./influxdb');
 const config = require('../config');
 const debug = require('debug-levels')('agile-data');
+const Record = require('./record');
 const TIMERS = {};
 
 module.exports = {
   update: function updateTimer (sub) {
-    console.log(sub)
-    console.log('hii')
+    this.clear(sub)
     return TIMERS[sub.id] = setInterval(() => {
-      console.log('running timer jobs', sub.id);
+      debug.log('running timer job', sub.id);
       const agile = require('agile-sdk')({
         api: config.AGILE_API,
         idm: config.AGILE_IDM
@@ -41,17 +40,11 @@ module.exports = {
       })
       .then(data => {
         debug.log('Data from agile-api', data);
-        const tags = [ 'deviceID', 'componentID' ];
-        return influx.writePoints([
-          {
-            measurement: 'records',
-            tags: _.assign(_.pick(sub, tags), { userID: sub.userID }),
-            fields: _.omit(data, tags.concat('user'))
-          }
-        ]);
+        data.subscriptionId = sub.id
+        return Record.create(data)
       })
       .then(() => {
-        console.log('saved to db');
+        console.log('saved to db', Date.now());
       })
       .catch(err => {
         console.log(err);
@@ -59,6 +52,6 @@ module.exports = {
     }, sub.interval || config.INTERVAL_DEFAULT);
   },
   clear: function clearTimer (sub) {
-    return clearInterval(timers[sub.id])
+    return clearInterval(TIMERS[sub.id])
   }
 };

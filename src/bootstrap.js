@@ -2,30 +2,17 @@
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const _ = require('lodash');
-const influx = require('./models/influxdb');
-const timers = require('./models/timer');
+const Timer = require('./models/timer');
+const Subscription = require('./models/subscription')
 const config = require('./config');
 const debug = require('debug-levels')('agile-data');
 
 module.exports = () => {
-  return influx.getDatabaseNames()
-  .then(names => {
-    if (!names.includes(config.DB_NAME)) {
-      return influx.createDatabase(config.DB_NAME);
-    }
-  })
-  .then(() => {
-    return influx.showRetentionPolicies();
-  })
-  .then((policies) => {
-    if (!_.find(policies, { name: config.DB_RP_NAME })) {
-      return influx.createRetentionPolicy(config.DB_RP_NAME, {
-        database: config.DB_NAME,
-        duration: config.DB_RP_DURATION,
-        replication: 1,
-        isDefault: true
-      });
-    }
+  Subscription.find({})
+  .then(subscriptions => {
+    subscriptions.forEach(sub => {
+      Timer.update(sub);
+    })
   })
   .catch(err => {
     console.log(err);

@@ -22,14 +22,14 @@ body: {
 
 ```
 method: DELETE
-url: /api/subscription/:device/:component
+url: /api/subscription/:subscriptionId
 ```
 
 #### Update subscription for device component
 
 ```
 method: PUT
-url: /api/subscription/:device/:component
+url: /api/subscription/:subscriptionId
 body: {
   interval: '10000'
 }
@@ -39,16 +39,9 @@ body: {
 
 ```
 method: GET
-url: /api/subscription/:device/:component
+url: /api/subscription/:subscriptionId
 ```
 
-
-#### Read subscription for device
-
-```
-method: GET
-url: /api/subscription/:device
-```
 
 #### Read subscriptions all subscriptions on gateway
 

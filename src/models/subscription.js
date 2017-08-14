@@ -14,7 +14,7 @@ const SubscriptionSchema = new mongoose.Schema({
 // on every save,
 // add created_at
 // add interval timer
-SubscriptionSchema.pre('save', function (next) {
+SubscriptionSchema.post('save', function (next) {
   if (!this.created_at) {
     var currentDate = new Date();
     this.created_at = currentDate;
