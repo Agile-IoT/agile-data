@@ -17,8 +17,6 @@ RUN JOBS=MAX npm install
 # This will copy all files in our root to the working  directory in the container
 COPY . ./
 
-COPY ./src/config/influxdb.conf /etc/influxdb/influxdb.conf
-
 EXPOSE 1338
 
 ENV INIT_SYSTEM on

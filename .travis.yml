@@ -25,7 +25,6 @@ env:
       VERSIONIST=true
     - DOCKER_IMAGE=agileiot/$COMPONENT-x86_64
       BASEIMAGE=resin\\/intel-nuc-node:7.8.0-20170506
-      ARCH=amd64
 
 before_install:
   - source <(curl -s https://raw.githubusercontent.com/Agile-IoT/agile-ci-scripts/master/agile-ci-functions.sh)
@@ -36,7 +35,6 @@ before_install:
 script:
   - travis_wait 40 docker_build_if_needed
   - if [[ -n ${DOCKER_TAG} ]]; then
-      docker build -t $DOCKER_IMAGE:$DOCKER_TAG .;
       docker run --env NODE_ENV=TEST $DOCKER_IMAGE:$DOCKER_TAG;
     fi
   - cache_save
