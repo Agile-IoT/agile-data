@@ -65,5 +65,22 @@ url: /api/records
 
 ```
 method: GET
-url: /api/record?where={"deviceID":"bleA0E6F8B62304", "componentID": "temperature"}&order={"by": "time", "direction": "DESC"}&limit=3
+url: /api/record?<query>
+```
+
+### update Settings
+
+```
+method: PUT
+url: /api/settings
+body: {
+  interval: 3000
+}
+```
+
+### get Settings
+
+```
+method: GET
+url: /api/settings
 ```
