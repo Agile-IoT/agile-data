@@ -1,7 +1,7 @@
 #!/bin/bash
-mkdir -p /data/influxdb
-chown influxdb:influxdb /data/influxdb
-influxd -config /etc/influxdb/influxdb.conf &
+mkdir -p /data/db
+chown mongo:mongo /data/db
+service mongodb start &
 if [ $NODE_ENV == "TEST" ]
 then
   npm run test

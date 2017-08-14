@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
-const Subscription = require('../models/subscription');
+const { Subscription, Timer } = require('../models');
 
 router.route('/')
   .get((req, res, next) => {
@@ -16,6 +16,9 @@ router.route('/')
   })
   .delete((req, res, next) => {
     Subscription.remove({})
+    .then(() => {
+      Timer.clearAll();
+    })
     .then(() => res.sendStatus(200))
     .catch(next);
   });
@@ -36,8 +39,11 @@ router.route('/:id')
     .catch(next);
   })
   .delete((req, res, next) => {
-    Subscription.findByIdAndRemove(req.params.id)
-    .then(() => res.send(200))
+    Subscription
+    .findById(req.params.id)
+    .then(sub => sub.clearTimer())
+    .then(sub => sub.remove())
+    .then(() => res.sendStatus(200))
     .catch(next);
   });
 

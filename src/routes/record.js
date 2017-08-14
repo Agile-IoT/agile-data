@@ -1,14 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const _ = require('lodash');
-const config = require('../config');
-const Record = require('../models/record');
+const { Record } = require('../models');
 
 router.route('/')
   .get((req, res, next) => {
-    Record.find(req.query)
-    .then(data => res.send(data))
-    .catch(next);
+    if (req.query) {
+      Record.query(req.query)
+      .then(data => res.send(data))
+      .catch(next);
+    } else {
+      Record.find({})
+      .then(data => res.send(data))
+      .catch(next);
+    }
   })
   .post((req, res, next) => {
     Record.create(req.body)
@@ -16,7 +20,8 @@ router.route('/')
     .catch(next);
   })
   .delete((req, res, next) => {
-    Record.remove({})
+    Record
+    .remove({})
     .then(() => res.sendStatus(200))
     .catch(next);
   });
@@ -24,16 +29,8 @@ router.route('/')
 router.route('/:id')
   .delete((req, res, next) => {
     Record.findByIdAndRemove(req.params.id)
-    .then(() => res.send(200))
+    .then(() => res.sendStatus(200))
     .catch(next);
-  });
-
-router.route('/retention')
-  .get((req, res, next) => {
-    res.send()
-  })
-  .put((req, res, next) => {
-    res.send()
   });
 
 module.exports = router;

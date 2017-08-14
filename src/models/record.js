@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
+const ms = require('ms');
+const QueryPlugin = require('mongoose-query');
 mongoose.connect('mongodb://localhost/agile-data');
+const Subscription = require('./subscription');
 
 const recordSchema = new mongoose.Schema({
   componentID: { type: String, required: true },
@@ -7,24 +10,31 @@ const recordSchema = new mongoose.Schema({
   value: String,
   unit: String,
   format: String,
-  lastUpdate: { type: Date },
+  subscription: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription'},
+  lastUpdate: { type: Date }
 });
 
-// on every save,
-// add created_at
-// add interval timer
-// SubscriptionSchema.pre('save', function (next) {
-//   if (!this.created_at) {
-//     var currentDate = new Date();
-//     this.created_at = currentDate;
-//   }
-//   try {
-//     Timer.update(this);
-//   } catch (e) {
-//     next(e);
-//   }
-//   next();
-// });
+recordSchema.plugin(QueryPlugin);
+
+recordSchema.pre('save', function (next) {
+  mongoose.models.Subscription
+    .findOne({ _id: this.subscription })
+    .exec()
+    .then(subscription => {
+      if (!this.createdAt) {
+        this.createdAt = Date.now();
+      }
+      if (!this.expireAt && subscription) {
+        this.createdAt = Date.now() + ms(subscription.retention);
+      }
+
+      next();
+    })
+    .catch(err => {
+      console.log(err);
+      next(err);
+    });
+});
 
 const Record = mongoose.model('Record', recordSchema);
 

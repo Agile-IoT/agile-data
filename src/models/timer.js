@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const config = require('../config');
 const debug = require('debug-levels')('agile-data');
 const Record = require('./record');
@@ -6,8 +5,8 @@ const TIMERS = {};
 
 module.exports = {
   update: function updateTimer (sub) {
-    this.clear(sub)
-    return TIMERS[sub.id] = setInterval(() => {
+    this.clear(sub);
+    TIMERS[sub.id] = setInterval(() => {
       debug.log('running timer job', sub.id);
       const agile = require('agile-sdk')({
         api: config.AGILE_API,
@@ -19,12 +18,11 @@ module.exports = {
       return Promise.resolve(client)
       .then(client => {
         if (client) {
-          return;
           return agile.idm.authentication.authenticateClient(client.name, client.clientSecret).then(function (result) {
             return result.access_token;
-          })
+          });
         } else {
-          return;
+
         }
       })
       .then(token => {
@@ -36,12 +34,12 @@ module.exports = {
         });
       })
       .then(sdk => {
-        return sdk.device.lastUpdate(sub.deviceID, sub.componentID)
+        return sdk.device.lastUpdate(sub.deviceID, sub.componentID);
       })
       .then(data => {
         debug.log('Data from agile-api', data);
-        data.subscriptionId = sub.id
-        return Record.create(data)
+        data.subscription = sub.id;
+        return Record.create(data);
       })
       .then(() => {
         console.log('saved to db', Date.now());
@@ -49,9 +47,16 @@ module.exports = {
       .catch(err => {
         console.log(err);
       });
-    }, sub.interval || config.INTERVAL_DEFAULT);
+    }, sub.interval);
+
+    return TIMERS[sub.id];
   },
   clear: function clearTimer (sub) {
-    return clearInterval(TIMERS[sub.id])
+    return clearInterval(TIMERS[sub.id]);
+  },
+  clearAll: function () {
+    Object.keys(TIMERS).foreach(k => {
+      return clearInterval(TIMERS[k])
+    })
   }
 };

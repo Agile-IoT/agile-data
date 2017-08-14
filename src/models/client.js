@@ -6,13 +6,13 @@ const ClientShema = new mongoose.Schema({
   deviceID: String,
   userID: String,
   subscriptionID: String,
-  updated_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now }
 });
 
 const Subscription = mongoose.model('Subscription', SubscriptionSchema);
 
 // on every save, add the date
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   // get the current date
   var currentDate = new Date();
 
