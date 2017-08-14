@@ -1,50 +1,62 @@
-const _ = require('lodash');
-const influx = require('./influxdb');
 const config = require('../config');
 const debug = require('debug-levels')('agile-data');
+const Record = require('./record');
 const TIMERS = {};
-
-function generateTimerId (sub) {
-  return `${sub.deviceID}-${sub.componentID}-${sub.user && sub.user.id}`;
-}
-
-function getTimer (sub) {
-  return TIMERS[generateTimerId(sub)];
-}
 
 module.exports = {
   update: function updateTimer (sub) {
-    TIMERS[generateTimerId(sub)] = setInterval(() => {
+    this.clear(sub);
+    TIMERS[sub.id] = setInterval(() => {
+      debug.log('running timer job', sub.id);
       const agile = require('agile-sdk')({
         api: config.AGILE_API,
         idm: config.AGILE_IDM
       });
 
-      agile.device.lastUpdate(sub.deviceID, sub.componentID)
-      .then((data) => {
+      const client = null;
+
+      return Promise.resolve(client)
+      .then(client => {
+        if (client) {
+          return agile.idm.authentication.authenticateClient(client.name, client.clientSecret).then(function (result) {
+            return result.access_token;
+          });
+        } else {
+
+        }
+      })
+      .then(token => {
+        // TODO allow the sdk to load a token after the fact.
+        return require('agile-sdk')({
+          api: config.AGILE_API,
+          idm: config.AGILE_IDM,
+          token: token
+        });
+      })
+      .then(sdk => {
+        return sdk.device.lastUpdate(sub.deviceID, sub.componentID);
+      })
+      .then(data => {
         debug.log('Data from agile-api', data);
-        const tags = [ 'deviceID', 'componentID', 'user' ];
-        return influx.writePoints([
-          {
-            measurement: 'records',
-            tags: _.pick(sub, tags),
-            fields: _.omit(data, tags)
-          }
-        ]);
+        data.subscription = sub.id;
+        return Record.create(data);
       })
       .then(() => {
-        console.log('saved to db');
+        console.log('saved to db', Date.now());
       })
       .catch(err => {
         console.log(err);
       });
-    }, sub.interval || config.INTERVAL_DEFAULT);
+    }, sub.interval);
 
-    return sub;
+    return TIMERS[sub.id];
   },
-  get: getTimer,
   clear: function clearTimer (sub) {
-    clearInterval(getTimer(sub));
-    return sub;
+    return clearInterval(TIMERS[sub.id]);
+  },
+  clearAll: function () {
+    return Object.keys(TIMERS).map(k => {
+      return clearInterval(TIMERS[k])
+    })
   }
 };

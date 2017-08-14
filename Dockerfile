@@ -1,9 +1,8 @@
 FROM resin/intel-nuc-node:7.8.0-20170506
 
 ARG NODE_ENV=prod
-ENV DB_FILE=/data/db.json
 
-RUN apt-get update && apt-get install -y netcat
+RUN apt-get update && apt-get install -y netcat mongodb-org
 
 # Install influxdb
 RUN wget -O /tmp/influxdb.deb https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_amd64.deb && \
