@@ -28,24 +28,6 @@ module.exports = () => {
       });
     }
   })
-  .then(() => {
-    return fs.statAsync(config.DB_FILE)
-    .catch(() => {
-      return fs.writeFileAsync(config.DB_FILE, JSON.stringify({ subscriptions: [] }, null, 4));
-    });
-  })
-  .then(() => {
-    return fs.readFileAsync(config.DB_FILE);
-  })
-  .then(data => {
-    // setup db stores
-    db.set('clients', JSON.parse(data).subscriptions || []).write();
-    db.set('subscriptions', JSON.parse(data).subscriptions || []).write();
-    return;
-  })
-  .then(() => {
-    return db.get('subscriptions').forEach(timers.update).write();
-  })
   .catch(err => {
     console.log(err);
     debug.log(err);

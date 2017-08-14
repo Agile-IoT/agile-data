@@ -6,6 +6,7 @@ const subscriptionRoutes = require('./routes/subscription');
 const recordRoutes = require('./routes/record');
 const config = require('./config');
 const bootstrap = require('./bootstrap');
+const db = require('./models/db');
 
 bootstrap();
 
@@ -17,6 +18,18 @@ app.use(function (req, res, next) {
   }
   next();
 });
+
+// Connect to Mongo on start
+db.connect('mongodb://localhost:27017/mydatabase', function(err) {
+  if (err) {
+    console.log('Unable to connect to Mongo.')
+    process.exit(1)
+  } else {
+    app.listen(3000, function() {
+      console.log('Listening on port 3000...')
+    })
+  }
+})
 
 app.get('/ping', function (req, res) {
   res.send('OK');
