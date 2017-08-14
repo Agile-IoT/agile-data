@@ -114,7 +114,6 @@ describe('Subscription', function() {
 });
 
 describe('record', function() {
-
   before(function(done) {
     var url = 'mongodb://localhost/agile-data';
     MongoClient.connect(url, function(err, db) {
@@ -148,6 +147,29 @@ describe('record', function() {
     agile.data.record.get(`where={"deviceID":"${DUMMY_SUBSCRIPTION.deviceID}"}&order={ "by": "time", "direction": "ASC"}`)
     .then((data) => {
       expect(data).to.be.an('array');
+      done();
+    });
+  });
+});
+
+
+describe('record', function() {
+  it('get', function(done) {
+    agile.data.settings.get()
+    .then((data) => {
+      expect(data).to.be.an('object');
+      expect(data).to.have.any.keys('retention', 'updated_at');
+      done();
+    });
+  });
+
+  it('update', function(done) {
+    agile.data.settings.update({
+      retention: '4d'
+    })
+    .then((data) => {
+      expect(data).to.be.an('object');
+      expect(data.retention).to.equal('4d');
       done();
     });
   });

@@ -55,7 +55,7 @@ module.exports = {
     return clearInterval(TIMERS[sub.id]);
   },
   clearAll: function () {
-    Object.keys(TIMERS).foreach(k => {
+    return Object.keys(TIMERS).map(k => {
       return clearInterval(TIMERS[k])
     })
   }

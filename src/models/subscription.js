@@ -8,25 +8,30 @@ const SubscriptionSchema = new mongoose.Schema({
   userID: String,
   clientID: String,
   interval: { type: Number, default: 9000 },
+  retention: { type: String },
   updated_at: { type: Date, default: Date.now },
-  // default one week retention
-  retention: { type: String, default: '7d' }
 });
 
 // on every save,
 // add created_at
+// add retention setting if no set directly
 // add interval timer
 SubscriptionSchema.pre('save', function (next) {
-  if (!this.created_at) {
-    var currentDate = new Date();
-    this.created_at = currentDate;
-  }
-  try {
-    Timer.update(this);
-  } catch (e) {
-    next(e);
-  }
-  next();
+  mongoose.models.Settings.findOne({}).then(settings => {
+    if (!this.created_at) {
+      var currentDate = new Date();
+      this.created_at = currentDate;
+    }
+    if (!this.retention) {
+      this.retention = settings.retention;
+    }
+    try {
+      Timer.update(this);
+    } catch (e) {
+      next(e);
+    }
+    next();
+  })
 });
 
 SubscriptionSchema.methods.clearTimer = function () {

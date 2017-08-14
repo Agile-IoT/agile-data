@@ -25,7 +25,7 @@ recordSchema.pre('save', function (next) {
         this.createdAt = Date.now();
       }
       if (!this.expireAt && subscription) {
-        this.createdAt = Date.now() + ms(subscription.retention);
+        this.expireAt = Date.now() + ms(subscription.retention);
       }
 
       next();
