@@ -1,6 +1,7 @@
-const config = require('../config');
 const debug = require('debug-levels')('agile-data');
 const Record = require('./record');
+const Client = require('./client');
+const agile = require('./agile-sdk');
 const TIMERS = {};
 
 module.exports = {
@@ -8,45 +9,35 @@ module.exports = {
     this.clear(sub);
     TIMERS[sub.id] = setInterval(() => {
       debug.log('running timer job', sub.id);
-      const agile = require('agile-sdk')({
-        api: config.AGILE_API,
-        idm: config.AGILE_IDM
-      });
-
-      const client = null;
-
-      return Promise.resolve(client)
-      .then(client => {
-        if (client) {
-          return agile.idm.authentication.authenticateClient(client.name, client.clientSecret).then(function (result) {
-            return result.access_token;
-          });
-        } else {
-
-        }
-      })
-      .then(token => {
-        // TODO allow the sdk to load a token after the fact.
-        return require('agile-sdk')({
-          api: config.AGILE_API,
-          idm: config.AGILE_IDM,
-          token: token
+      // 1. Get subscription client
+      // 2. Authenticate client and get token
+      // 3. Fetch data from agile API
+      // 4. Save new Record
+      Client.findOne({ subscription: sub.id })
+        .then(client => {
+          if (client) {
+            return agile.idm.authentication.authenticateClient(client.name, client.clientSecret).then(function (result) {
+              return result.access_token;
+            });
+          }
+        })
+        .then(token => {
+          agile.tokenSet(token);
+          return agile.device.lastUpdate(sub.deviceID, sub.componentID);
+        })
+        .then(data => {
+        // clear it for safety so no other requests use token
+          agile.tokenDelete();
+          debug.log('Data from agile-api', data);
+          data.subscription = sub.id;
+          return Record.create(data);
+        })
+        .then(() => {
+          console.log('saved to db', Date.now());
+        })
+        .catch(err => {
+          console.log(err);
         });
-      })
-      .then(sdk => {
-        return sdk.device.lastUpdate(sub.deviceID, sub.componentID);
-      })
-      .then(data => {
-        debug.log('Data from agile-api', data);
-        data.subscription = sub.id;
-        return Record.create(data);
-      })
-      .then(() => {
-        console.log('saved to db', Date.now());
-      })
-      .catch(err => {
-        console.log(err);
-      });
     }, sub.interval);
 
     return TIMERS[sub.id];

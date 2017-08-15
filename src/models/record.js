@@ -10,7 +10,8 @@ const recordSchema = new mongoose.Schema({
   unit: String,
   format: String,
   subscription: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
-  lastUpdate: Date
+  lastUpdate: Date,
+  expireAt: Date
 });
 
 recordSchema.plugin(QueryPlugin);
@@ -30,7 +31,6 @@ recordSchema.pre('save', function (next) {
       next();
     })
     .catch(err => {
-      console.log(err);
       next(err);
     });
 });
