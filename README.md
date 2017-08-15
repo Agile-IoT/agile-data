@@ -14,7 +14,8 @@ url: /api/subscription
 body: {
   deviceID: 'mySensor',
   componentID: 'temperature',
-  interval: '3000'
+  interval: '3000',
+  retention: '7d' // all records created by this subscription are deleted after 7 days
 }
 ```
 
@@ -22,14 +23,14 @@ body: {
 
 ```
 method: DELETE
-url: /api/subscription/:device/:component
+url: /api/subscription/:subscriptionId
 ```
 
 #### Update subscription for device component
 
 ```
 method: PUT
-url: /api/subscription/:device/:component
+url: /api/subscription/:subscriptionId
 body: {
   interval: '10000'
 }
@@ -39,16 +40,9 @@ body: {
 
 ```
 method: GET
-url: /api/subscription/:device/:component
+url: /api/subscription/:subscriptionId
 ```
 
-
-#### Read subscription for device
-
-```
-method: GET
-url: /api/subscription/:device
-```
 
 #### Read subscriptions all subscriptions on gateway
 
@@ -71,17 +65,22 @@ url: /api/records
 
 ```
 method: GET
-url: /api/record?where={"deviceID":"bleA0E6F8B62304", "componentID": "temperature"}&order={"by": "time", "direction": "DESC"}&limit=3
+url: /api/record?<query>
 ```
 
-#### Update Retention
-
-Set a interval at which old records expire.
+### update Settings
 
 ```
 method: PUT
-url: /api/retention
+url: /api/settings
 body: {
-  duration: '3d'
+  interval: 3000
 }
+```
+
+### get Settings
+
+```
+method: GET
+url: /api/settings
 ```

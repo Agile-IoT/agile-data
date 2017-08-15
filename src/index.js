@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const subscriptionRoutes = require('./routes/subscription');
 const recordRoutes = require('./routes/record');
+const settingsRoutes = require('./routes/settings');
 const config = require('./config');
 const bootstrap = require('./bootstrap');
 
@@ -24,6 +25,7 @@ app.get('/ping', function (req, res) {
 
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/record', recordRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.use(function (req, res) {
   res.status(404).send('Not Found');
@@ -38,6 +40,7 @@ app.use((err, req, res) => {
   }
 });
 
+// Connect to Mongo on start
 app.listen(config.PORT, function () {
   console.log(`Example app listening on port ${config.PORT}!`);
 });

@@ -1,72 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const _ = require('lodash');
-const influx = require('../models/influxdb');
-const squel = require('squel');
-const config = require('../config');
-
-function buildQuery (query) {
-  let queryObj = squel.select().from('records');
-
-  if (query.where) {
-    const whereStatements = JSON.parse(query.where);
-    _.forEach(Object.keys(whereStatements), (key) => {
-      queryObj.where(`${key}=?`, whereStatements[key]);
-    });
-  }
-
-  if (query.limit) {
-    queryObj.limit(query.limit);
-  }
-
-  if (query.order) {
-    const order = JSON.parse(query.order);
-    queryObj.order(order.by, order.direction);
-  }
-
-  return queryObj.toString();
-}
+const { Record } = require('../models');
 
 router.route('/')
   .get((req, res, next) => {
-    const query = buildQuery(req.query);
-    influx.query(query)
-    .then((data) => {
-      res.send(data);
-    })
-    .catch(next);
+    if (req.query) {
+      Record.query(req.query)
+      .then(data => res.send(data))
+      .catch(next);
+    } else {
+      Record.find({})
+      .then(data => res.send(data))
+      .catch(next);
+    }
   })
   .post((req, res, next) => {
-    res.send('coming soon :)');
-  })
-  .delete((req, res, next) => {
-    res.send('coming soon :)');
-  });
-
-router.route('/retention')
-  .get((req, res, next) => {
-    influx.showRetentionPolicies()
-    .then(policies => {
-      res.send(_.find(policies, { name: config.DB_RP_NAME }));
-    })
+    Record.create(req.body)
+    .then(data => res.send(data))
     .catch(next);
   })
-  .put((req, res, next) => {
-    if (!req.body.duration) {
-      throw new Error('body.duration required');
-    }
-    // we only maintain one policy and keep altering it.
-    influx.alterRetentionPolicy(config.DB_RP_NAME, {
-      duration: req.body.duration,
-      replication: 1,
-      isDefault: true
-    })
-    .then(data => {
-      return influx.showRetentionPolicies();
-    })
-    .then(policies => {
-      res.send(_.find(policies, { name: config.DB_RP_NAME }));
-    })
+  .delete((req, res, next) => {
+    Record
+    .remove({})
+    .then(() => res.sendStatus(200))
+    .catch(next);
+  });
+
+router.route('/:id')
+  .delete((req, res, next) => {
+    Record.findByIdAndRemove(req.params.id)
+    .then(() => res.sendStatus(200))
     .catch(next);
   });
 

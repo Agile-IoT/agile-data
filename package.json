@@ -6,9 +6,9 @@
   "scripts": {
     "lint": "eslint src/**",
     "lint:fix": "eslint --fix src/**",
-    "test": "npm run lint && bash test/test.sh",
+    "test": "bash test/test.sh",
     "start": "node src/index.js",
-    "dev": "node test/mock.js & nodemon --delay 3500ms src/index.js"
+    "dev": "node test/mock.js & nodemon --delay 1 --ignore 'src/data/*.json' src/index.js"
   },
   "repository": {
     "type": "git",
@@ -21,16 +21,16 @@
   },
   "homepage": "https://github.com/agile-iot/agile-data#readme",
   "dependencies": {
-    "agile-sdk": "^0.4.0",
+    "agile-sdk": "^1.0.0",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.1",
     "debug-levels": "^0.2.0",
     "express": "^4.15.2",
-    "express-bearer-token": "2.1.0",
-    "influx": "5.0.0-alpha.4",
     "lodash": "^4.17.4",
-    "lowdb": "^0.16.2",
-    "squel": "^5.10.0"
+    "mongodb": "^2.2.31",
+    "mongoose": "^4.11.6",
+    "mongoose-query": "^0.3.0",
+    "ms": "^2.0.0"
   },
   "devDependencies": {
     "axios": "0.16.1",

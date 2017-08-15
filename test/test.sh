@@ -1,7 +1,6 @@
 trap 'kill $(jobs -p)' EXIT 1
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-rm $parent_path/../src/data/db.json &
 node test/mock.js &
 while ! echo exit | nc localhost 9999; do sleep 1; done
 node src/index.js &
