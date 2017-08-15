@@ -1,6 +1,6 @@
 {
   "name": "agile-data",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A data service for agile-iot",
   "main": "src/index.js",
   "scripts": {
