@@ -1,6 +1,6 @@
 FROM resin/raspberry-pi3-node:7.8.0-20170426
 
-ARG NODE_ENV=prod
+ENV NODE_ENV production
 
 RUN apt-get update && apt-get install -y netcat mongodb \
   && rm -rf /var/lib/apt/lists/*
