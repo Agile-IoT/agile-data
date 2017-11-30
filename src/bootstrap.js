@@ -26,7 +26,6 @@ module.exports = () => {
     })
     .then(subscriptions => {
       subscriptions.forEach(sub => {
-        console.log(sub);
         Timer.update(sub);
       });
     })
