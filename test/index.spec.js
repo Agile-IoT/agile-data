@@ -5,6 +5,7 @@ const config = require('../src/config');
 const _ = require('lodash');
 const fs = require('fs');
 const crypto = require('crypto');
+const timers = require('../src/models/timer')
 const MongoClient = require('mongodb').MongoClient
 chai.use(chaiAsPromised);
 const agile = require('agile-sdk')({
@@ -38,6 +39,7 @@ function sleep(time) {
 }
 
 function dropCollections(done) {
+  timers.clearAll()
   Promise.all(collections.map((c) => {
     return mongoDB.collection(c).remove({})
   }))
@@ -183,13 +185,32 @@ describe('agile data', function () {
     });
 
     it('get with query', function(done) {
-      agile.data.record.get(`where={"deviceID":"${DUMMY_SUBSCRIPTION.deviceID}"}&order={ "by": "time", "direction": "ASC"}`)
+      agile.data.subscription.create({
+        deviceID: 'deviceA',
+        componentID: 'humidity',
+        interval: 100, // super short so we can query right away
+      })
+      .then(() => {
+        return agile.data.subscription.create({
+          deviceID: 'deviceB',
+          componentID: 'humidity',
+          interval: 100, // super short so we can query right away
+        })
+      })
+      .then(() => sleep(500))
+      .then(() => {
+        return agile.data.record.get(`deviceID=deviceB`)
+      })
       .then((data) => {
         expect(data).to.be.an('array');
+        // ensure query works as expected
+        data.map(record => {
+          expect(record.deviceID === 'deviceB')
+        });
         done();
       })
       .catch(done)
-    });
+    }).timeout(5000)
   });
 
 
