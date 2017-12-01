@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const MongoQS = require('mongo-querystring');
+const qs = new MongoQS();
+
 const { Record } = require('../models');
 
 router.route('/')
   .get((req, res, next) => {
     if (req.query) {
-      Record.query(req.query)
+      Record.find(req.query)
         .then(data => res.send(data))
         .catch(next);
     } else {

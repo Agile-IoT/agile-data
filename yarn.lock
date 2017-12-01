@@ -2284,6 +2284,10 @@ moment@^2.17.1:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
 
+mongo-querystring@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/mongo-querystring/-/mongo-querystring-4.1.1.tgz#4824ea917fbda8128730ab4bc9b2dd4f7275c471"
+
 mongodb-core@2.1.15:
   version "2.1.15"
   resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-2.1.15.tgz#841f53b87ffff4c7458189c35c8ae827e1169764"
