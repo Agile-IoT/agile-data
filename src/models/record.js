@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+const mongoose = require('./mongoose');
 const ms = require('ms');
 const QueryPlugin = require('mongoose-query');
-mongoose.connect('mongodb://localhost/agile-data');
+
 
 const recordSchema = new mongoose.Schema({
   componentID: { type: String, required: true },
