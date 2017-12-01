@@ -6,7 +6,7 @@ This service allows users to create workers called `subscriptions` that consume 
 
 ### API
 
-#### Create subscription for device component with 3 second interval
+#### Create subscription for device component
 
 ```
 method: POST
@@ -14,8 +14,15 @@ url: /api/subscription
 body: {
   deviceID: 'mySensor',
   componentID: 'temperature',
-  interval: '3000',
-  retention: '7d' // all records created by this subscription are deleted after 7 days
+  // all keys below are optional
+  interval: '3000', // measure every 3s
+  retention: '7d' // All records created by this subscription are deleted after 7 days,
+  encrypt: {
+    key:  // base64 encoded public key,
+    fields: [
+      'value',
+    ] // List of keys, which values will be encrypted.
+  }
 }
 ```
 

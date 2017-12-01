@@ -2,6 +2,9 @@ const debug = require('debug-levels')('agile-data');
 const Record = require('./record');
 const Client = require('./client');
 const agile = require('./agile-sdk');
+const get = require('lodash/get');
+const crypto = require('crypto');
+
 const TIMERS = {};
 
 module.exports = {
@@ -30,6 +33,19 @@ module.exports = {
           agile.tokenDelete();
           debug.log('Data from agile-api', data);
           data.subscription = sub.id;
+
+          // lets encrypt if there is an encryption key on the subscription
+          const encryptionKey = get(sub, 'encrypt.key');
+          const encryptionFields = get(sub, 'encrypt.fields');
+
+          if (encryptionKey && encryptionFields) {
+            // convert public key - base64 string to utf-8
+            const key = Buffer.from(encryptionKey, 'base64').toString('utf-8');
+            encryptionFields.map(k => {
+              // encrypt each encryptionField with pub key + base64 encode.
+              data[k] = crypto.publicEncrypt(key, Buffer.from(String(data[k]))).toString('base64');
+            });
+          }
           return Record.create(data);
         })
         .then(() => {

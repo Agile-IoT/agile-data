@@ -13,10 +13,20 @@ const SubscriptionSchema = new mongoose.Schema({
   interval: { type: Number, default: 9000 },
   retention: { type: String },
   updated_at: { type: Date, default: Date.now },
-  token: { type: String }
+  token: { type: String },
+  encrypt: {
+    key: {
+      type: String
+    },
+    fields: {
+      type: Array
+    }
+  }
 });
 
-// on every save,
+// this is more complex than it needs to be because we are allowing
+// both authenticated and unauthed requests to create subs.
+// on every save:
 // add created_at
 // add retention setting from global settings if not set directly
 // if req.token is present create a Client associated with subscription
@@ -50,7 +60,7 @@ SubscriptionSchema.pre('save', function (next) {
             next(err);
           });
       }
-    // if no token don't create client
+      // if no token don't create client
     })
     .then(() => {
       if (this.token) {
@@ -59,10 +69,7 @@ SubscriptionSchema.pre('save', function (next) {
         // set user info on subscription
         return agile.idm.user.getCurrentUserInfo().then((info) => {
           this.userID = info.id;
-        })
-          .catch(err => {
-            next(err);
-          });
+        });
       }
     })
     .then(() => {
