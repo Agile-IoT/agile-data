@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
 const randomToken = require('rand-token');
 const config = require('../config');
-mongoose.connect('mongodb://localhost/agile-data');
+const mongoose = require('./mongoose');
 const Timer = require('./timer');
 const agile = require('./agile-sdk');
 
@@ -96,6 +95,11 @@ SubscriptionSchema.methods.clearTimer = function () {
   }
   return this;
 };
+
+SubscriptionSchema.pre('remove', function(next) {
+  this.clearTimer();
+  next();
+});
 
 const Subscription = mongoose.model('Subscription', SubscriptionSchema);
 

@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/agile-data');
+const mongoose = require('./mongoose');
 
 const SettingsSchema = new mongoose.Schema({
   retention: { type: String, default: '7d' },

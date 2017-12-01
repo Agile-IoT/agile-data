@@ -49,10 +49,10 @@ module.exports = {
           return Record.create(data);
         })
         .then(() => {
-          console.log('saved to db', Date.now());
+          debug('saved to db', Date.now());
         })
         .catch(err => {
-          console.log(err);
+          debug(err);
         });
     }, sub.interval);
 

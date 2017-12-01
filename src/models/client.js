@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/agile-data');
+const mongoose = require('./mongoose');
 
 const ClientSchema = new mongoose.Schema({
   subscription: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
