@@ -10,7 +10,12 @@
 const express = require('express');
 const router = express.Router();
 const MongoQS = require('mongo-querystring');
-const qs = new MongoQS();
+const qs = new MongoQS({
+  custom: {
+    before: 'lastUpdate',
+    after: 'lastUpdate'
+  }
+});
 
 const { Record } = require('../models');
 
