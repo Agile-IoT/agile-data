@@ -10,13 +10,24 @@
 const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
+const MongoQS = require('mongo-querystring');
+
+const qs = new MongoQS();
+
 const { Subscription, Timer } = require('../models');
 
 router.route('/')
   .get((req, res, next) => {
-    Subscription.find({})
-      .then(subscriptions => res.send(subscriptions))
-      .catch(next);
+    if (req.query) {
+      const query = qs.parse(req.query)
+      Subscription.find(query)
+        .then(subscriptions => res.send(subscriptions))
+        .catch(next);
+    } else {
+      Subscription.find({})
+        .then(subscriptions => res.send(subscriptions))
+        .catch(next);
+    }
   })
   .post((req, res, next) => {
     Subscription.create(_.assign(req.body, {
