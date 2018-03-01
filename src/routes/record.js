@@ -10,14 +10,20 @@
 const express = require('express');
 const router = express.Router();
 const MongoQS = require('mongo-querystring');
-const qs = new MongoQS();
+const qs = new MongoQS({
+  custom: {
+    before: 'lastUpdate',
+    after: 'lastUpdate'
+  }
+});
 
 const { Record } = require('../models');
 
 router.route('/')
   .get((req, res, next) => {
     if (req.query) {
-      Record.find(req.query)
+      const query = qs.parse(req.query)
+      Record.find(query)
         .then(data => res.send(data))
         .catch(next);
     } else {
