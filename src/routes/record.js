@@ -17,7 +17,8 @@ const { Record } = require('../models');
 router.route('/')
   .get((req, res, next) => {
     if (req.query) {
-      Record.find(req.query)
+      const query = qs.parse(req.query)
+      Record.find(query)
         .then(data => res.send(data))
         .catch(next);
     } else {
