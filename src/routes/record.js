@@ -39,10 +39,16 @@ router.route('/')
       .catch(next);
   })
   .delete((req, res, next) => {
-    Record
-      .remove({})
-      .then(() => res.sendStatus(200))
-      .catch(next);
+    if (req.query) {
+      const query = qs.parse(req.query)
+      Record.remove(query)
+        .then(() => res.sendStatus(200))
+        .catch(next);
+    } else {
+      Record.remove({})
+        .then(() => res.sendStatus(200))
+        .catch(next);
+    }
   });
 
 router.route('/:id')
