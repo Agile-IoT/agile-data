@@ -14,7 +14,8 @@ const MongoQS = require('mongo-querystring');
 const qs = new MongoQS({
   custom: {
     before: 'lastUpdate',
-    after: 'lastUpdate'
+    after: 'lastUpdate',
+    between: 'lastUpdate'
   }
 });
 
