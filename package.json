@@ -15,7 +15,7 @@
     "url": "git+https://github.com/agile-iot/agile-data"
   },
   "author": "Craig Mulligan <craig@resin.io>",
-  "license": "ISC",
+  "license": "EPL-2.0",
   "bugs": {
     "url": "https://github.com/agile-iot/agile-data/issues"
   },
