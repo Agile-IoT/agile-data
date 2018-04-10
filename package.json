@@ -32,7 +32,8 @@
     "mongoose": "^4.11.6",
     "mongoose-query": "^0.3.0",
     "ms": "^2.0.0",
-    "rand-token": "0.3.0"
+    "rand-token": "0.3.0",
+    "request": "2.85.0"
   },
   "devDependencies": {
     "axios": "0.16.2",
