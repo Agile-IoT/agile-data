@@ -1,11 +1,13 @@
 /*******************************************************************************
- *Copyright (C) 2018 Orange.
- *All rights reserved. This program and the accompanying materials
- *are made available under the terms of the Eclipse Public License v1.0
- *which accompanies this distribution, and is available at
- *http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (C) 2018 Orange.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
  *
- *Contributors:
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
  *    Rombit - initial API and implementation
  ******************************************************************************/
 
@@ -32,7 +34,7 @@ module.exports = {
         uploadDirectories: (typeof remotepath !== 'undefined') ? path.dirname(remotepath).split('/') : [],
         loopCount: 0
       };
-      console.log("owncloud uploadConfig");
+        console.log("--- Owncloud upload data ---");
       console.log(uploadConfig);
 
       uploadToOwnCloud(uploadConfig, credentials, function (err) {
@@ -51,8 +53,6 @@ module.exports = {
   }
 };
 function uploadToOwnCloud(uploadConfig, credentials, cb) {
-  console.log('uploadToOwnCloud');
-
   let req = {
     method: 'PUT',
     uri: credentials.owncloudServer + '/remote.php/webdav/'+ uploadConfig.uploadFileName,
@@ -65,9 +65,6 @@ function uploadToOwnCloud(uploadConfig, credentials, cb) {
   };
 
   request(req, function (error, response, body) {
-    //console.log(req);
-    // console.log("uploadToOwnCloud request body");
-    // console.log(body);
     if (error && (typeof response === "undefined" || typeof response.statusCode === "undefined")) {
       console.log("Owncloud: owncloud server response invalid");
       cb("Owncloud: owncloud server response invalid");
@@ -102,8 +99,6 @@ function uploadToOwnCloud(uploadConfig, credentials, cb) {
   });
 }
 function createFoldersOwnCloud(uploadConfig, credentials, cb,errorcb) {
-  // console.log('createFoldersOwnCloud');
-
   let mkdirReq = {
     method: 'MKCOL',
     uri: credentials.owncloudServer + '/remote.php/webdav/'+ uploadConfig.uploadDirectories.slice(0, uploadConfig.uploadDirectories.length - uploadConfig.loopCount).join('/'),
@@ -115,24 +110,17 @@ function createFoldersOwnCloud(uploadConfig, credentials, cb,errorcb) {
   };
 
   request(mkdirReq, function (error, response, body) {
-    // console.log(mkdirReq);
-    // console.log(body);
-    // console.log(error);
-
     if ((response.statusCode === 404 || response.statusCode === 409) && ( uploadConfig.loopCount < uploadConfig.uploadDirectories.length)) {
       uploadConfig.loopCount += 1;
       createFoldersOwnCloud(uploadConfig, credentials, cb,errorcb);
     }else if(response.statusCode.toString().indexOf("2") === 0) {
       if (uploadConfig.loopCount === 0) {
-        console.log('cb null');
         cb(null);
       } else {
         uploadConfig.loopCount -= 1;
         createFoldersOwnCloud(uploadConfig, credentials, cb, errorcb);
       }
     }else if ( uploadConfig.loopCount > uploadConfig.uploadDirectories.length){
-      console.log('errorcb');
-
       errorcb("uploadConfig.loopCount to high" + body);
     }else{
       errorcb("file upload error" + body);

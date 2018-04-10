@@ -1,11 +1,14 @@
 /*******************************************************************************
- * Copyright (C) 2018 resin.io, and others
- *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * Copyright (C) 2018 Orange.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *    Rombit - initial API and implementation
  ******************************************************************************/
 const express = require('express');
 const router = express.Router();
@@ -16,11 +19,6 @@ const qs = new MongoQS();
 
 const OwnCloud = require('../clouds/owncloud');
 const { Record } = require('../models');
-
-// console.log("---- OwnCloud -----");
-// console.log(OwnCloud);
-// console.log("---- OwnCloud endpoint -----");
-// console.log(OwnCloud.endpointDescription);
 
 router.route('/')
   .get((req, res, next) => {
@@ -46,7 +44,6 @@ router.route('/:cloudId')
     if (req.params.cloudId === "owncloud"){
       res.send(OwnCloud.endpointDescription());
 
-
     }else if (req.params.cloudId === "dropbox") {
       res.status(501).send('Dropbox Cloud not implemented');
     }else if (req.params.cloudId === "googledrive") {
@@ -59,18 +56,18 @@ router.route('/:cloudId')
   .post((req, res, next) => {
     if (req.query) {
       const query = qs.parse(req.query);
-      let credentials = {
-        "clientId": "agile",
-        "clientSecret": "test",
-        "owncloudServer": "http://agile-owncloud.romcloud.be/owncloud"};
-      Record.find(query)
-        .then(data => {
-          console.log("--- Owncloud data ---");
-          console.log(data);
-          return OwnCloud.upload(credentials, "testFolder/testfile.txt", data)
-        })
-        .then(() => res.send("done"))
-        .catch((err) => res.status(500).send(err));
+      if (req.body.credentials === undefined || req.body.credentials.clientId === undefined || req.body.credentials.clientSecret === undefined || req.body.credentials.owncloudServer === undefined){
+        res.status(400).send("body credentials parameters not correct, please include clientId, clientSecret and owncloudServer");
+      }else if (req.body.uploadPath === undefined){
+        res.status(400).send("uploadPath not specified");
+      }else{
+        Record.find(query)
+          .then(data => {
+            return OwnCloud.upload(req.body.credentials, req.body.uploadPath , data)
+          })
+          .then(() => res.send("done"))
+          .catch((err) => res.status(500).send(err));
+      }
     } else {
       res.status(400).send("query parameter not found");
     }
