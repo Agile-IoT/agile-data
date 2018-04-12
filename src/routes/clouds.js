@@ -51,29 +51,31 @@ router.route('/:cloudId')
     }
   })
   .post((req, res, next) => {
-    const {credentials, uploadPath} = req
-    const query = qs.parse(req.query)
+    const {credentials, uploadPath, query} = req.body
 
     if (!uploadPath){
       res.status(400).send("uploadPath not specified");
-    }
-
-    if (!query) {
-      res.status(400).send("query parameter not found");
     }
 
     if (!credentials) {
       res.status(400).send('no credentials provided');
     }
 
-    if(!credentials.clientId || !credentials.clientSecret || !credentials.owncloudServer) {
+    const {clientId, clientSecret, owncloudServer} = credentials
+    if(!clientId || !clientSecret || !owncloudServer) {
       res.status(400).send('incomplete credentials, please provide the clientId, clientSecret, and ownCloudServer');
     }
 
-    return Record.find(query)
+    let dbQuery = {}
+
+    if (query) {
+      dbQuery = qs.parse(query)
+    }
+
+    return Record.find(dbQuery)
       .then(data => OwnCloud.upload(credentials, uploadPath, data))
-        .then(res.send("done"))
-        .catch(err => res.status(500).send(err));
+        .then(() => res.send("done"))
+        .catch(err => res.status(500).send(err.message));
   })
 
 module.exports = router;
