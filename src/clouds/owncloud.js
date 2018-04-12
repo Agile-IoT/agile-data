@@ -10,120 +10,118 @@
  * Contributors:
  *    Rombit - initial API and implementation
  ******************************************************************************/
-
-// const debug = require('debug-levels')('agile-data');
-// const agile = require('./agile-sdk');
-// const get = require('lodash/get');
-const path = require('path');
-const request = require('request');
+const path = require('path')
+const axios = require('axios')
 
 module.exports = {
-  endpointDescription: function () {
-    return({
-      "cloud": "owncloud",
-    })
+  endpointDescription: () => {
+    return { "cloud": "owncloud", }
   },
-  upload: function(credentials, remotepath,payload) {
-    return new Promise(function(resolve, reject) {
 
-      if (typeof remotepath !== 'undefined' && typeof remotepath !== "undefined"  && typeof payload !== "undefined") {
-      let uploadConfig = {
-        uploadContent: JSON.stringify(payload),
-        uploadFileName: (typeof remotepath !== 'undefined') ? remotepath : dateFormat(new Date(), "yyyy.mm.dd") + "-Agile.txt",
-        uploadDirectory: (typeof remotepath !== 'undefined') ? path.dirname(remotepath) : '',
-        uploadDirectories: (typeof remotepath !== 'undefined') ? path.dirname(remotepath).split('/') : [],
-        loopCount: 0
-      };
-        console.log("--- Owncloud upload data ---");
-      console.log(uploadConfig);
+  upload: (credentials, remotepath, payload) => {
+    if (!remotepath || !payload) {
+      return reject('Owncloud: request invalid')
+    }
 
-      uploadToOwnCloud(uploadConfig, credentials, function (err) {
-        if (err) {
-          console.log("Owncloud: error uploading file");
-          reject(err);
-        }else{
-          resolve( "upload complete")
-        }
-      });
+    const uploadConfig = {
+      uploadContent: JSON.stringify(payload),
+      uploadFileName: remotepath, 
+      uploadDirectory: path.dirname(remotepath),
+      uploadDirectories: path.dirname(remotepath).split('/'),
+      loopCount: 0
+    };
 
-      } else {
-        reject("Owncloud: request invalid.");
-      }
-    });
+    console.log("--- Owncloud upload data ---");
+    console.log(uploadConfig);
+
+    return uploadToOwnCloud(uploadConfig, credentials)
   }
 };
-function uploadToOwnCloud(uploadConfig, credentials, cb) {
-  let req = {
+
+uploadToOwnCloud = (uploadConfig, credentials) => {
+  const { owncloudServer, clientId, clientSecret } = credentials
+  const { uploadFileName, uploadContent } = uploadConfig
+
+  const req = {
     method: 'PUT',
-    uri: credentials.owncloudServer + '/remote.php/webdav/'+ uploadConfig.uploadFileName,
+    uri: `${owncloudServer}/remote.php/webdav/${uploadFileName}`,
     auth: {
-      username: credentials.clientId,
-      password: credentials.clientSecret
+      username: clientId,
+      password: clientSecret
     },
     timeout: 10000,
-    body: uploadConfig.uploadContent
+    body: uploadContent
   };
 
-  request(req, function (error, response, body) {
-    if (error && (typeof response === "undefined" || typeof response.statusCode === "undefined")) {
-      console.log("Owncloud: owncloud server response invalid");
-      cb("Owncloud: owncloud server response invalid");
-      return;
-    }
-    if (response.statusCode === 401) {
-      cb("owncloud: unauthorized");
-      return
-    }else if (response.statusCode === 404 || response.statusCode === 409) {
-      createFoldersOwnCloud(uploadConfig, credentials, function () {
-        uploadToOwnCloud(uploadConfig, credentials, cb)
-      }, function (err) {
-        console.log("Owncloud:" + err);
-        cb("Owncloud:" + err);
-    });
+  return axios(req)
+    .catch(error => {
+      const {status, data} = error.response
 
-    }else if(response.statusCode.toString().indexOf("2") !== 0) {
-      let stripPrefix = function(str) {
-        let prefixMatch = new RegExp(/(?!xmlns)^.*:/);
-        return str.replace(prefixMatch, '');
-      };
-      let parser = new xml2js.Parser({ignoreAttrs: true,tagNameProcessors: [stripPrefix]});
-      parser.parseString(body, function (err, result) {
-        if (result && typeof result["error"]!== 'undefined' && typeof result["error"]["message"] !== 'undefined') {
-          cb("file upload error" + result["error"]["message"]);
-        }
-        cb("file upload error" + body);
-      });
-    }else{
-      cb(null);
-    }
-  });
+      if (status === 404 || status === 409) {
+        return createFoldersOwnCloud(uploadConfig, credentials)
+          .then(uploadToOwnCloud(uploadConfig, credentials))
+      }
+
+      if (status < 200 && status > 299) {
+        const errorMsg = parseXmlResponse(data)
+        throw new Error(errorMsg)
+      }
+
+      throw new error('Owncloud: error during request to server')
+    })
 }
-function createFoldersOwnCloud(uploadConfig, credentials, cb,errorcb) {
-  let mkdirReq = {
+
+createFoldersOwnCloud = (uploadConfig, credentials) => {
+  const {owncloudServer, clientId, clientSecret} = credentials
+  const {uploadDirectories, loopCount} = uploadConfig
+
+  const folderPath = uploadDirectories.slice(0, uploadDirectories.length - loopCount).join('/')
+
+  const mkdirReq = {
     method: 'MKCOL',
-    uri: credentials.owncloudServer + '/remote.php/webdav/'+ uploadConfig.uploadDirectories.slice(0, uploadConfig.uploadDirectories.length - uploadConfig.loopCount).join('/'),
+    uri: `${owncloudServer}/remote.php/webdav/${folderPath}`,
     timeout: 10000,
     auth: {
-      username: credentials.clientId,
-      password: credentials.clientSecret
+      username: clientId,
+      password: clientSecret
     }
   };
 
-  request(mkdirReq, function (error, response, body) {
-    if ((response.statusCode === 404 || response.statusCode === 409) && ( uploadConfig.loopCount < uploadConfig.uploadDirectories.length)) {
-      uploadConfig.loopCount += 1;
-      createFoldersOwnCloud(uploadConfig, credentials, cb,errorcb);
-    }else if(response.statusCode.toString().indexOf("2") === 0) {
-      if (uploadConfig.loopCount === 0) {
-        cb(null);
-      } else {
-        uploadConfig.loopCount -= 1;
-        createFoldersOwnCloud(uploadConfig, credentials, cb, errorcb);
+  return axios(mkdirReq)
+    .then(result => {
+      if (loopCount === 0) {
+        return
       }
-    }else if ( uploadConfig.loopCount > uploadConfig.uploadDirectories.length){
-      errorcb("uploadConfig.loopCount to high" + body);
-    }else{
-      errorcb("file upload error" + body);
+
+      uploadConfig.loopCount -= 1
+      return createFoldersOwnCloud(uploadConfig, credentials)
+    })
+    .catch(err => {
+      const {status} = error.response
+      const canRecurse = loopCount < uploadDirectories.length
+
+      if ((status === 404 || status === 409) && canRecurse) {
+        uploadConfig.loopCount -= 1
+        return createFoldersOwnCloud(uploadConfig, credentials)
+      }
+
+      if (!canRecurse) {
+        throw new Error('uploadConfig.loopCount to high')
+      }
+    })
+}
+
+parseXmlResponse = (body) => {
+  const parser = new xml2js.Parser({
+    ignoreAttrs: true,
+    tagNameProcessors: [(name) => name.replace(new RegExp(/(?!xmlns)^.*:/), '')]
+  })
+
+  parser.parseString(body, (err, result) => {
+    if (result && result.error && result.error.message) {
+      throw new Error(result.error.message)
     }
-  });
+
+    return body
+  })
 }

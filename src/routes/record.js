@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const MongoQS = require('mongo-querystring');
+const { Record } = require('../models');
 
 const qs = new MongoQS({
   custom: {
@@ -18,8 +19,6 @@ const qs = new MongoQS({
     between: 'lastUpdate'
   }
 });
-
-const { Record } = require('../models');
 
 router.route('/')
   .get((req, res, next) => {

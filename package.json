@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/agile-iot/agile-data#readme",
   "dependencies": {
+    "axios": "^0.18.0",
     "agile-sdk": "^1.1.0",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.1",
@@ -32,11 +33,9 @@
     "mongoose": "^4.11.6",
     "mongoose-query": "^0.3.0",
     "ms": "^2.0.0",
-    "rand-token": "0.3.0",
-    "request": "2.85.0"
+    "rand-token": "0.3.0"
   },
   "devDependencies": {
-    "axios": "0.16.2",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
     "chance": "1.0.11",
