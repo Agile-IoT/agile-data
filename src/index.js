@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Copyright (C) 2018 resin.io, and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
 'use strict';
@@ -14,6 +14,8 @@ const bodyParser = require('body-parser');
 const subscriptionRoutes = require('./routes/subscription');
 const recordRoutes = require('./routes/record');
 const settingsRoutes = require('./routes/settings');
+const cloudsRoutes = require('./routes/clouds');
+
 const config = require('./config');
 const bootstrap = require('./bootstrap');
 
@@ -35,6 +37,7 @@ app.get('/ping', function (req, res) {
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/record', recordRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/clouds', cloudsRoutes);
 
 app.use(function (req, res) {
   res.status(404).send('Not Found');
