@@ -16,28 +16,57 @@ const xml2js = require('xml2js')
 
 module.exports = {
   endpointDescription: () => {
-    return { "cloud": "owncloud" }
+    return {
+      cloudName: "owncloud",
+      requiredFields : [{
+        displayName: "Username",
+        name: "clientId",
+        description: "The username used for authentication against the OwnClowd instance."
+      }, {
+        displayName: "Password",
+        name: "clientSecret",
+        description: "The password used for authentication against the OwnClowd instance."
+      }, {
+        displayName: "Upload Path",
+        name: "uploadPath",
+        description: "What file should the data be uploaded to?"
+      }, {
+        displayName: "ownCloud Server Url",
+        name: "owncloudServer",
+        description: "The url of your ownCloud instance."
+      }]
+    }
   },
 
-  upload: async (credentials, remotepath, payload) => {
-    if (!remotepath || !payload) {
-      return reject('Owncloud: request invalid')
+  upload: async (customArgs, data) => {
+    if (!customArgs) {
+      throw new Error('no credentials provided');
+    }
+
+    const { uploadPath, clientId, clientSecret, owncloudServer } = customArgs
+
+    if (!uploadPath || !data) {
+      throw new Error('Owncloud: request invalid')
+    }
+
+    if(!clientId || !clientSecret || !owncloudServer) {
+      throw new Error('incomplete credentials, please provide the clientId, clientSecret, and ownCloudServer')
     }
 
     const uploadConfig = {
-      uploadContent: JSON.stringify(payload),
-      uploadFileName: remotepath, 
-      uploadDirectory: path.dirname(remotepath),
-      uploadDirectories: path.dirname(remotepath).split('/'),
+      uploadContent: JSON.stringify(data),
+      uploadFileName: uploadPath,
+      uploadDirectory: path.dirname(uploadPath),
+      uploadDirectories: path.dirname(uploadPath).split('/'),
       loopCount: 0
     };
 
-    return uploadToOwnCloud(uploadConfig, credentials)
+    return uploadToOwnCloud(uploadConfig, customArgs)
   }
 };
 
-uploadToOwnCloud = async (uploadConfig, credentials) => {
-  const { owncloudServer, clientId, clientSecret } = credentials
+uploadToOwnCloud = async (uploadConfig, customArgs) => {
+  const { owncloudServer, clientId, clientSecret } = customArgs
   const { uploadFileName, uploadContent } = uploadConfig
 
   const req = {
@@ -58,8 +87,8 @@ uploadToOwnCloud = async (uploadConfig, credentials) => {
     const {status, data} = error.response
 
     if (status === 404 || status === 409) {
-      await createFoldersOwnCloud(uploadConfig, credentials)
-      await uploadToOwnCloud(uploadConfig, credentials)
+      await createFoldersOwnCloud(uploadConfig, customArgs)
+      await uploadToOwnCloud(uploadConfig, customArgs)
       return
     }
 
@@ -75,8 +104,8 @@ uploadToOwnCloud = async (uploadConfig, credentials) => {
   }
 }
 
-createFoldersOwnCloud = async (uploadConfig, credentials) => {
-  const {owncloudServer, clientId, clientSecret} = credentials
+createFoldersOwnCloud = async (uploadConfig, customArgs) => {
+  const {owncloudServer, clientId, clientSecret} = customArgs
   const {uploadDirectories} = uploadConfig
 
   const folderPath = uploadDirectories
@@ -99,7 +128,7 @@ createFoldersOwnCloud = async (uploadConfig, credentials) => {
       return
     } else {
       uploadConfig.loopCount -= 1
-      createFoldersOwnCloud(uploadConfig, credentials)
+      createFoldersOwnCloud(uploadConfig, customArgs)
     }
   } catch (error) {
     const { status } = error.response
@@ -107,7 +136,7 @@ createFoldersOwnCloud = async (uploadConfig, credentials) => {
 
     if ((status === 404 || status === 409) && shouldRecurse) {
       uploadConfig.loopCount += 1
-      await createFoldersOwnCloud(uploadConfig, credentials)
+      await createFoldersOwnCloud(uploadConfig, customArgs)
       return
     }
 
