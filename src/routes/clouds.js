@@ -16,24 +16,30 @@ const MongoQS = require('mongo-querystring');
 const OwnCloud = require('../clouds/owncloud');
 const { Record } = require('../models');
 
-const qs = new MongoQS();
+const qs = new MongoQS({
+  custom: {
+    before: 'lastUpdate',
+    after: 'lastUpdate',
+    between: 'lastUpdate'
+  }
+});
 
 router.route('/')
   .get((req, res, next) => {
     res.send({
-      "clouds":[
-        {
-          "owncloud": {
-            "implemented": true
-          },
-          "dropbox": {
-            "implemented": false
-          },
-          "googleDrive": {
-            "implemented": false
-          }
-        }
-      ]
+      clouds:[{
+        endpoint: "owncloud",
+        displayName: "ownCloud",
+        implemented: true
+      },{
+        endppint: "dropbox",
+        displayName: "Dropbox",
+        implemented: false
+      }, {
+        endpoint: "googleDrive",
+        displayName: "Google Drive",
+        implemented: false
+      }]
     });
   });
 
@@ -51,21 +57,7 @@ router.route('/:cloudId')
     }
   })
   .post((req, res, next) => {
-    const {credentials, uploadPath, query} = req.body
-
-    if (!uploadPath){
-      res.status(400).send("uploadPath not specified");
-    }
-
-    if (!credentials) {
-      res.status(400).send('no credentials provided');
-    }
-
-    const {clientId, clientSecret, owncloudServer} = credentials
-    if(!clientId || !clientSecret || !owncloudServer) {
-      res.status(400).send('incomplete credentials, please provide the clientId, clientSecret, and ownCloudServer');
-    }
-
+    const {customArgs, query} = req.body
     let dbQuery = {}
 
     if (query) {
@@ -73,7 +65,7 @@ router.route('/:cloudId')
     }
 
     return Record.find(dbQuery)
-      .then(data => OwnCloud.upload(credentials, uploadPath, data))
+      .then(data => OwnCloud.upload(customArgs, data))
         .then(() => res.send("done"))
         .catch(err => res.status(500).send(err.message));
   })
