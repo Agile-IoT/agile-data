@@ -14,6 +14,7 @@ const express = require('express');
 const router = express.Router();
 const MongoQS = require('mongo-querystring');
 const OwnCloud = require('../clouds/owncloud');
+const Dropbox = require('../clouds/dropbox');
 const { Record } = require('../models');
 
 const qs = new MongoQS({
@@ -32,9 +33,9 @@ router.route('/')
         displayName: "ownCloud",
         implemented: true
       },{
-        endppint: "dropbox",
+        endpoint: "dropbox",
         displayName: "Dropbox",
-        implemented: false
+        implemented: true
       }, {
         endpoint: "googleDrive",
         displayName: "Google Drive",
@@ -49,7 +50,7 @@ router.route('/:cloudId')
     if (cloudId === "owncloud"){
       res.send(OwnCloud.endpointDescription());
     } else if (cloudId === "dropbox") {
-      res.status(501).send('Dropbox Cloud not yet implemented');
+      res.send(Dropbox.endpointDescription());
     } else if (cloudId === "googledrive") {
       res.status(501).send('Google Drive Cloud not yet implemented');
     }else {
@@ -57,6 +58,7 @@ router.route('/:cloudId')
     }
   })
   .post((req, res, next) => {
+    const {cloudId} = req.params
     const {customArgs, query} = req.body
     let dbQuery = {}
 
@@ -64,8 +66,19 @@ router.route('/:cloudId')
       dbQuery = qs.parse(query)
     }
 
+    const upload = {
+        "owncloud": OwnCloud.upload,
+        "dropbox": Dropbox.upload
+    }
+
     return Record.find(dbQuery)
-      .then(data => OwnCloud.upload(customArgs, data))
+      .then(data => {
+          if (upload[cloudId] === undefined) {
+            res.status(406).send('Unsuported cloud provider');
+          } else {
+            return upload[cloudId](customArgs, data)
+          }
+        })
         .then(() => res.send("done"))
         .catch(err => res.status(500).send(err.message));
   })

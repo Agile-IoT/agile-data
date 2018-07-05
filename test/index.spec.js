@@ -244,7 +244,7 @@ describe('agile data', function () {
         done();
       })
       .catch(done)
-    });
+    }).timeout(5000);
   });
 
 }).timeout(5000)

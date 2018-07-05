@@ -26,6 +26,7 @@
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.1",
     "debug-levels": "^0.2.0",
+    "dropbox": "4.0.3",
     "express": "^4.15.2",
     "lodash": "^4.17.4",
     "mongo-querystring": "4.1.1",
